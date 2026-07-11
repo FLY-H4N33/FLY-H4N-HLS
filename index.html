@@ -79,14 +79,12 @@
     const authError = document.getElementById('auth-error');
     const authSubmitBtn = document.getElementById('auth-submit-btn');
 
-    // 엔터키 누르면 인증 시도되도록 처리
     document.getElementById('secret-key-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         validateKeyOnServer();
       }
     });
 
-    // 💡 [핵심 변경] 첫 화면에서 버튼 누를 시 서버(Worker)로 키 검증 요청을 보냄
     async function validateKeyOnServer() {
       const inputVal = document.getElementById('secret-key-input').value.trim();
       if (inputVal === "") { 
@@ -100,7 +98,6 @@
       authError.classList.add('hidden');
 
       try {
-        // Worker 측에 action: "validate" 패킷을 보내 키 유효성만 선제 확인
         const response = await fetch(WORKER_URL, {
           method: "POST",
           headers: {
@@ -115,7 +112,6 @@
           throw new Error(errData.error || "인증에 실패했습니다.");
         }
 
-        // 성공 시 키를 저장하고 팝업창을 닫음
         userAccessKey = inputVal;
         document.getElementById('auth-overlay').classList.add('hidden');
 
@@ -139,22 +135,44 @@
       }
     });
 
-    function appendMessage(role, text) {
-      if (welcomeMessage) welcomeMessage.style.display = 'none';
-      const isUser = role === 'user';
-      const wrapper = document.createElement('div');
-      wrapper.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'}`;
-      const parsedContent = isUser ? escapeHtml(text) : marked.parse(text);
+    function escapeHtml(string) {
+      return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '=': '&#x3D;' }[s];
+      });
+    }
 
+    // 💡 스트리밍 말풍선을 생성하고 그 내부 엘리먼트를 반환하는 함수
+    function createAssistantBubble() {
+      if (welcomeMessage) welcomeMessage.style.display = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex w-full justify-start';
+      
       wrapper.innerHTML = `
-        <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 ${isUser ? 'bg-[#5865F2] text-white rounded-br-none' : 'bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none'} shadow-md">
-          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">${isUser ? 'You' : 'H4N EXPERT'}</div>
-          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">${parsedContent}</div>
+        <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md">
+          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">H4N EXPERT</div>
+          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area"></div>
         </div>
       `;
       chatContainer.appendChild(wrapper);
       chatContainer.scrollTop = chatContainer.scrollHeight;
-      if (!isUser) Prism.highlightAllIn(wrapper);
+      return {
+        wrapper: wrapper,
+        contentArea: wrapper.querySelector('.chat-content-area')
+      };
+    }
+
+    function appendUserMessage(text) {
+      if (welcomeMessage) welcomeMessage.style.display = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex w-full justify-end';
+      wrapper.innerHTML = `
+        <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-[#5865F2] text-white rounded-br-none shadow-md">
+          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">You</div>
+          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">${escapeHtml(text)}</div>
+        </div>
+      `;
+      chatContainer.appendChild(wrapper);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     function showLoading() {
@@ -179,22 +197,20 @@
       if (loader) loader.remove();
     }
 
-    function escapeHtml(string) {
-      return String(string).replace(/[&<>"'`=\/]/g, function (s) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '=': '&#x3D;' }[s];
-      });
-    }
-
+    // 💡 [핵심 변경] SSE 스트리밍 데이터를 받아서 파싱하는 핸들러
     async function handleSubmit(event) {
       event.preventDefault();
       const text = userInput.value.trim();
       if (!text) return;
 
-      appendMessage('user', text);
+      appendUserMessage(text);
       chatHistory.push({ role: 'user', content: text });
       userInput.value = '';
       charCounter.textContent = '0 / 5,000';
       showLoading();
+
+      let assistantText = "";
+      let bubbleElements = null;
 
       try {
         const response = await fetch(WORKER_URL, {
@@ -213,11 +229,53 @@
           throw new Error(errData.error || `서버 통신 실패 (Status: ${response.status})`);
         }
 
-        const data = await response.json();
-        const aiText = data.choices[0].message.content;
+        // 스트림 리더 가져오기
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
 
-        appendMessage('assistant', aiText);
-        chatHistory.push({ role: 'assistant', content: aiText });
+        // 실시간으로 청크 조각 받기
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          
+          // 마지막 완성되지 않은 라인은 버퍼에 남김
+          buffer = lines.pop(); 
+
+          for (const line of lines) {
+            const cleanedLine = line.trim();
+            if (!cleanedLine || !cleanedLine.startsWith("data:")) continue;
+
+            const jsonStr = cleanedLine.replace(/^data:\s*/, "");
+            if (jsonStr === "[DONE]") break; // 스트림 종료 신호
+
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                // 최초 데이터 유입 시 말풍선 엘리먼트 생성
+                if (!bubbleElements) {
+                  bubbleElements = createAssistantBubble();
+                }
+                assistantText += delta;
+                // 실시간 마크다운 렌더링
+                bubbleElements.contentArea.innerHTML = marked.parse(assistantText);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+              }
+            } catch (e) {
+              // 부분 파싱 오류 무시
+            }
+          }
+        }
+
+        // 스트림 수신 종료 후 하이라이팅 적용 및 히스토리 누적
+        if (bubbleElements) {
+          Prism.highlightAllIn(bubbleElements.wrapper);
+          chatHistory.push({ role: 'assistant', content: assistantText });
+        }
 
       } catch (error) {
         removeLoading();
