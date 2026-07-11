@@ -603,13 +603,10 @@
         }
 
         if (bubbleElements && assistantText) {
-          Prism.highlightAllIn(bubbleElements.wrapper);
+          Prism.highlightAll(); // ◀ 안전한 표준 함수로 교체
           injectCopyButtons(bubbleElements.contentArea);
-          
-          // 💡 히스토리 배열에 추론 내용도 분리해서 안전 저장 연동
           chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
-          
-          saveCurrentChatToKV(); 
+          saveCurrentChatToKV(); // ◀ 이제 이 코드가정상적으로 실행됩니다!
         }
         if (!closeEvent.wasClean && assistantText === "") {
           showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
