@@ -270,7 +270,6 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'flex w-full justify-start';
             
-            // 💡 과거 내역 로드 시에도 추론 상태 가릴 수 있게 구조 맞춤 (과거 데이터에 reasoning 항목이 있을 수 있으므로)
             const hasReasoning = !!msg.reasoning;
             wrapper.innerHTML = `
               <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
@@ -287,12 +286,21 @@
               </div>
             `;
             chatContainer.appendChild(wrapper);
-            Prism.highlightAllIn(wrapper);
-            injectCopyButtons(wrapper.querySelector('.chat-content-area'));
+            
+            // 코드 하이라이팅 에러 안전 수정
+            if (typeof Prism !== 'undefined' && Prism.highlightAll) {
+              Prism.highlightAll();
+            }
+            
+            const contentArea = wrapper.querySelector('.chat-content-area');
+            if (contentArea) {
+              injectCopyButtons(contentArea);
+            }
           }
         });
         chatContainer.scrollTop = chatContainer.scrollHeight;
       } catch (e) {
+        console.error("대화 기록 로드 실패 사유:", e);
         chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-red-500">기록 로드 실패</p>';
       }
     }
@@ -308,7 +316,6 @@
       });
     }
 
-    // 💡 추론 레이어 토글(가리기/보이기) 처리 함수
     function toggleThought(btn) {
       const thoughtDiv = btn.nextElementSibling;
       const span = btn.querySelector('span');
@@ -404,7 +411,6 @@
       const wrapper = document.createElement('div');
       wrapper.className = 'flex w-full justify-start';
       
-      // 💡 추론 상태 레이어를 가릴 수 있도록 상단에 토글형 버튼 추가 조립
       wrapper.innerHTML = `
         <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
           <div class="flex justify-between items-center mb-2">
@@ -575,7 +581,6 @@
               }
 
               if (deltaReasoning) {
-                // 💡 추론 내용이 한 글자라도 들어오기 시작하면 토글 버튼 및 영역 활성화
                 bubbleElements.toggleBtn.classList.remove('hidden');
                 bubbleElements.thoughtArea.classList.remove('hidden');
                 thoughtText += deltaReasoning;
@@ -603,10 +608,12 @@
         }
 
         if (bubbleElements && assistantText) {
-          Prism.highlightAll(); // ◀ 안전한 표준 함수로 교체
+          if (typeof Prism !== 'undefined' && Prism.highlightAll) {
+            Prism.highlightAll();
+          }
           injectCopyButtons(bubbleElements.contentArea);
           chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
-          saveCurrentChatToKV(); // ◀ 이제 이 코드가정상적으로 실행됩니다!
+          saveCurrentChatToKV(); 
         }
         if (!closeEvent.wasClean && assistantText === "") {
           showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
