@@ -9,36 +9,14 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  
   <style>
-    /* 사진 속 사이트 톤에 맞춘 딥 다크 색상 커스텀 */
-    body {
-      background-color: #0b0c10;
-    }
-    .bg-dark-card {
-      background-color: #1f2833;
-    }
-    /* 스크롤바 커스텀 */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0b0c10;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1f2833;
-      border-radius: 3px;
-    }
-    /* 마크다운 내부 코드 스타일 리셋 */
-    .prose pre {
-      background-color: #111827 !important;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin: 0.5rem 0;
-    }
-    .prose code {
-      color: #f3f4f6;
-    }
+    body { background-color: #0b0c10; }
+    .bg-dark-card { background-color: #1f2833; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0c10; }
+    ::-webkit-scrollbar-thumb { background: #1f2833; border-radius: 3px; }
+    .prose pre { background-color: #111827 !important; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; }
+    .prose code { color: #f3f4f6; }
   </style>
 </head>
 <body class="text-gray-200 h-screen flex flex-col justify-between font-sans">
@@ -49,7 +27,7 @@
         <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">HLS</div>
       </div>
       <h2 class="text-2xl font-bold mb-2">Access Key Required</h2>
-      <p class="text-sm text-gray-400 mb-6">서비스를 이용하시려면 관리자로부터 부여받은 고유 키를 입력해주세요.</p>
+      <p class="text-sm text-gray-400 mb-6">서비스를 이용하시려면 고유 키를 입력해주세요.</p>
       <input type="password" id="secret-key-input" placeholder="고유 키를 입력하세요" 
         class="w-full p-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5865F2] mb-4 text-center">
       <button onclick="validateKey()" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium p-3 rounded-lg transition-colors">
@@ -63,48 +41,34 @@
     <div class="flex items-center space-x-3">
       <span class="font-extrabold text-xl tracking-wider text-white">H4N <span class="text-[#5865F2] text-sm font-normal">AI Chat</span></span>
     </div>
-    <div class="flex space-x-4 text-sm text-gray-400">
-      <a href="#" class="hover:text-white transition">About</a>
-      <a href="#" class="hover:text-white transition">Projects</a>
-      <a href="#" class="hover:text-white transition">Contact</a>
-    </div>
   </header>
 
   <main id="chat-container" class="flex-1 overflow-y-auto p-6 max-w-4xl w-full mx-auto space-y-6">
     <div id="welcome-message" class="text-center py-20 space-y-4">
       <div class="text-5xl">🦎</div>
       <h1 class="text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
-      <p class="text-gray-400 max-w-md mx-auto text-sm">H4N에서 제공되는 H4n Llm Service 입니다.</p>
+      <p class="text-gray-400 max-w-md mx-auto text-sm">H4N에서 제공하는 HLS LLM 이용 서비스 입니다.</p>
     </div>
   </main>
 
-  <footer class="p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
+  <footer class="p-4 bg-[#0b0c10] shrink-0 border-t border-t-gray-900">
     <div class="max-w-4xl w-full mx-auto relative">
-      
       <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
         <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요... (Shift + Enter 줄바꿈)" required maxlength="5000"
           class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
-        
         <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
           <span id="char-counter" class="text-xs text-gray-500">0 / 5,000</span>
-          
           <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1">
             <span>전송</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
           </button>
         </div>
       </form>
-      <p class="text-center text-xs text-gray-600 mt-2">AI 답변은 부정확할 수 있으므로 항상 교차 검증을 권장합니다.</p>
     </div>
   </footer>
 
   <script>
-    // ⚠️ 워커 주소 수정이 필요하다면 이곳을 변경하세요.
     const WORKER_URL = "https://hws.hanjungyeop33.workers.dev/"; 
-
-    let chatHistory = []; // { role: "user" | "assistant", content: "..." } 순수 보관 배열
+    let chatHistory = []; 
     let userAccessKey = "";
 
     const userInput = document.getElementById('user-input');
@@ -112,31 +76,21 @@
     const chatContainer = document.getElementById('chat-container');
     const welcomeMessage = document.getElementById('welcome-message');
 
-    // [방법 B 적용] 고유 키 인증 함수: 프론트 검사 없이 값만 담아 팝업 닫기
     function validateKey() {
       const inputVal = document.getElementById('secret-key-input').value.trim();
       if (inputVal !== "") { 
-        userAccessKey = inputVal; // 입력받은 키를 보관 (Worker 호출 시 사용)
-        document.getElementById('auth-overlay').classList.add('hidden'); // 팝업 숨기기
+        userAccessKey = inputVal; 
+        document.getElementById('auth-overlay').classList.add('hidden'); 
       } else {
         const err = document.getElementById('auth-error');
-        err.textContent = "키를 입력해주세요.";
         err.classList.remove('hidden');
       }
     }
 
-    // 글자 수 카운터 실시간 처리
     userInput.addEventListener('input', () => {
-      const len = userInput.value.length;
-      charCounter.textContent = `${len.toLocaleString()} / 5,000`;
-      if (len >= 5000) {
-        charCounter.classList.add('text-red-500');
-      } else {
-        charCounter.classList.remove('text-red-500');
-      }
+      charCounter.textContent = `${userInput.value.length.toLocaleString()} / 5,000`;
     });
 
-    // 엔터키 전송 처리 (Shift+Enter는 줄바꿈)
     userInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -144,44 +98,30 @@
       }
     });
 
-    // 화면에 메시지 버블 렌더링
     function appendMessage(role, text) {
       if (welcomeMessage) welcomeMessage.style.display = 'none';
-
       const isUser = role === 'user';
       const wrapper = document.createElement('div');
       wrapper.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'}`;
-
-      // 마크다운 파싱 설정 (사용자는 일반 텍스트, AI는 마크다운 허용)
       const parsedContent = isUser ? escapeHtml(text) : marked.parse(text);
 
       wrapper.innerHTML = `
         <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 ${isUser ? 'bg-[#5865F2] text-white rounded-br-none' : 'bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none'} shadow-md">
-          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">
-            ${isUser ? 'You' : 'H4N EXPERT'}
-          </div>
-          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">
-            ${parsedContent}
-          </div>
+          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">${isUser ? 'You' : 'H4N EXPERT'}</div>
+          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">${parsedContent}</div>
         </div>
       `;
-
       chatContainer.appendChild(wrapper);
       chatContainer.scrollTop = chatContainer.scrollHeight;
-      
-      // AI 코드 출력인 경우 하이라이팅 적용
-      if (!isUser) {
-        Prism.highlightAllIn(wrapper);
-      }
+      if (!isUser) Prism.highlightAllIn(wrapper);
     }
 
-    // 로딩 인디케이터 표시
     function showLoading() {
       const loader = document.createElement('div');
       loader.id = 'loading-bubble';
       loader.className = 'flex w-full justify-start';
       loader.innerHTML = `
-        <div class="bg-gray-950 text-gray-400 border border-gray-800 rounded-2xl rounded-bl-none p-4 shadow-md max-w-sm">
+        <div class="bg-gray-950 text-gray-400 border border-gray-800 rounded-2xl rounded-bl-none p-4 shadow-md">
           <div class="flex items-center space-x-2">
             <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
             <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
@@ -198,61 +138,49 @@
       if (loader) loader.remove();
     }
 
-    // HTML 이스케이프 유틸리티 (사용자 날것의 텍스트 주입 방어)
     function escapeHtml(string) {
       return String(string).replace(/[&<>"'`=\/]/g, function (s) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '=': '&#x3D;' }[s];
       });
     }
 
-    // 전송 폼 서브밋 핸들러
     async function handleSubmit(event) {
       event.preventDefault();
       const text = userInput.value.trim();
       if (!text) return;
 
-      // 1. 유저 UI 출력 및 상태 누적
       appendMessage('user', text);
       chatHistory.push({ role: 'user', content: text });
-      
-      // 입력창 초기화
       userInput.value = '';
       charCounter.textContent = '0 / 5,000';
-      
-      // 2. 로딩 작동
       showLoading();
 
       try {
-        // 3. Worker API 호출
         const response = await fetch(WORKER_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Access-Key": userAccessKey // 👈 첫 창에서 입력했던 키가 헤더에 실려 Worker로 갑니다.
+            "X-Access-Key": userAccessKey 
           },
-          body: JSON.stringify({
-            messages: chatHistory // 가공없이 순수 유저-어시스턴트 히스토리만 포함
-          })
+          body: JSON.stringify({ messages: chatHistory })
         });
 
         removeLoading();
 
+        // 💡 [핵심 수정] 401/403 등 서버 실패 시 던진 JSON 에러 문구를 추출하여 직접 바인딩
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || `서버 에러가 발생했습니다. (Status: ${response.status})`);
+          throw new Error(errData.error || `서버 내부 에러 (Status: ${response.status})`);
         }
 
-        // Worker가 돌려주는 엔드포인트 응답 처리 (NVIDIA API Chat Completion 결과)
         const data = await response.json();
         const aiText = data.choices[0].message.content;
 
-        // 4. AI 답변 UI 출력 및 대화 누적
         appendMessage('assistant', aiText);
         chatHistory.push({ role: 'assistant', content: aiText });
 
       } catch (error) {
         removeLoading();
-        // 에러 알림 버블 출력 (Worker에서 등록되지 않은 키일 경우 "등록되지 않은 고유 키입니다맨." 에러가 출력됩니다)
         const errWrapper = document.createElement('div');
         errWrapper.className = 'flex w-full justify-center';
         errWrapper.innerHTML = `
