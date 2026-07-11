@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>H4N AI Chat</title>
+  <title>HLS Service</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
@@ -11,6 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
   
   <style>
+    /* 사진 속 사이트 톤에 맞춘 딥 다크 색상 커스텀 */
     body {
       background-color: #0b0c10;
     }
@@ -45,7 +46,7 @@
   <div id="auth-overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
     <div class="bg-gray-900 p-8 rounded-xl border border-gray-800 w-full max-w-md text-center shadow-2xl">
       <div class="mb-4 flex justify-center">
-        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">H4N</div>
+        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">HLS</div>
       </div>
       <h2 class="text-2xl font-bold mb-2">Access Key Required</h2>
       <p class="text-sm text-gray-400 mb-6">서비스를 이용하시려면 관리자로부터 부여받은 고유 키를 입력해주세요.</p>
@@ -54,7 +55,7 @@
       <button onclick="validateKey()" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium p-3 rounded-lg transition-colors">
         인증 및 접속하기
       </button>
-      <p id="auth-error" class="text-red-500 text-sm mt-3 hidden">잘못된 인증 키입니다.</p>
+      <p id="auth-error" class="text-red-500 text-sm mt-3 hidden">키를 입력해주세요.</p>
     </div>
   </div>
 
@@ -73,7 +74,7 @@
     <div id="welcome-message" class="text-center py-20 space-y-4">
       <div class="text-5xl">🦎</div>
       <h1 class="text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
-      <p class="text-gray-400 max-w-md mx-auto text-sm">정보 보안 & AI 관련 프로젝트 및 연구를 선호하는 H4N 개발 전문가 챗봇 공간입니다.</p>
+      <p class="text-gray-400 max-w-md mx-auto text-sm">H4N에서 제공되는 H4n Llm Service 입니다.</p>
     </div>
   </main>
 
@@ -100,9 +101,8 @@
   </footer>
 
   <script>
-    // ⚠️ 직접 수정하실 부분
+    // ⚠️ 워커 주소 수정이 필요하다면 이곳을 변경하세요.
     const WORKER_URL = "https://hws.hanjungyeop33.workers.dev/"; 
-    const MASTER_KEY = "내_비밀_액세스_키"; // 이 사이트에 하드코딩해둘 고유 접속 허용 키 (수정 가능)
 
     let chatHistory = []; // { role: "user" | "assistant", content: "..." } 순수 보관 배열
     let userAccessKey = "";
@@ -112,14 +112,15 @@
     const chatContainer = document.getElementById('chat-container');
     const welcomeMessage = document.getElementById('welcome-message');
 
-    // 고유 키 인증 함수
+    // [방법 B 적용] 고유 키 인증 함수: 프론트 검사 없이 값만 담아 팝업 닫기
     function validateKey() {
       const inputVal = document.getElementById('secret-key-input').value.trim();
-      if (inputVal === MASTER_KEY) {
-        userAccessKey = inputVal;
-        document.getElementById('auth-overlay').classList.add('hidden');
+      if (inputVal !== "") { 
+        userAccessKey = inputVal; // 입력받은 키를 보관 (Worker 호출 시 사용)
+        document.getElementById('auth-overlay').classList.add('hidden'); // 팝업 숨기기
       } else {
         const err = document.getElementById('auth-error');
+        err.textContent = "키를 입력해주세요.";
         err.classList.remove('hidden');
       }
     }
@@ -227,10 +228,10 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Access-Key": userAccessKey // Worker의 허용 목록 검증 통과용 헤더 [cite: 5]
+            "X-Access-Key": userAccessKey // 👈 첫 창에서 입력했던 키가 헤더에 실려 Worker로 갑니다.
           },
           body: JSON.stringify({
-            messages: chatHistory // 가공없이 순수 유저-어시스턴트 히스토리만 포함 [cite: 8, 16]
+            messages: chatHistory // 가공없이 순수 유저-어시스턴트 히스토리만 포함
           })
         });
 
@@ -241,7 +242,7 @@
           throw new Error(errData.error || `서버 에러가 발생했습니다. (Status: ${response.status})`);
         }
 
-        // Worker가 돌려주는 엔드포인트 응답 처리 (NVIDIA API Chat Completion 결과) [cite: 18]
+        // Worker가 돌려주는 엔드포인트 응답 처리 (NVIDIA API Chat Completion 결과)
         const data = await response.json();
         const aiText = data.choices[0].message.content;
 
@@ -251,7 +252,7 @@
 
       } catch (error) {
         removeLoading();
-        // 에러 알림 버블 출력
+        // 에러 알림 버블 출력 (Worker에서 등록되지 않은 키일 경우 "등록되지 않은 고유 키입니다맨." 에러가 출력됩니다)
         const errWrapper = document.createElement('div');
         errWrapper.className = 'flex w-full justify-center';
         errWrapper.innerHTML = `
