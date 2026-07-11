@@ -67,7 +67,7 @@
     }
   </style>
 </head>
-<body class="text-gray-200 h-screen flex flex-col justify-between font-sans">
+<body class="text-gray-200 h-screen flex flex-col md:flex-row font-sans overflow-hidden">
 
   <div id="auth-overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
     <div class="bg-gray-900 p-8 rounded-xl border border-gray-800 w-full max-w-md text-center shadow-2xl">
@@ -85,49 +85,67 @@
     </div>
   </div>
 
-  <header class="border-b border-gray-800 bg-[#0b0c10] px-6 py-4 flex justify-between items-center shrink-0">
-    <div class="flex items-center space-x-3">
-      <span class="font-extrabold text-xl tracking-wider text-white">H4N <span class="text-[#5865F2] text-sm font-normal">AI Chat</span></span>
-    </div>
-  </header>
-
-  <main id="chat-container" class="flex-1 overflow-y-auto p-6 max-w-4xl w-full mx-auto space-y-6">
-    <div id="welcome-message" class="text-center py-16 space-y-5">
-      <div class="flex justify-center">
-        <img src="https://github.com/FLY-H4N33/FLY-H4N-HLS/blob/main/HLSlogo.png?raw=true" alt="HLS Logo" class="logo-style">
+  <aside id="sidebar" class="w-full md:w-64 bg-gray-950 border-b md:border-b-0 md:border-r border-gray-900 flex flex-col shrink-0 h-48 md:h-full z-10">
+    <div class="p-4 border-b border-gray-900 flex flex-col gap-2">
+      <div class="font-extrabold text-xl tracking-wider text-white px-2 py-1">
+        H4N <span class="text-[#5865F2] text-sm font-normal">AI Chat</span>
       </div>
-      <h1 class="text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
-      <p class="text-gray-400 max-w-md mx-auto text-sm">HLS Service : H4N 의 무료 LLM 서비스 (서비스 이용시 이용약관 동의로 간주함)</p>
-      <p class="text-gray-400 max-w-md mx-auto text-sm">이용약관 보기 : https://fly-h4n33.github.io/license_HLS </p>
+      <button onclick="startNewChat()" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-lg text-sm font-medium p-2.5 transition flex items-center justify-center gap-2 mt-2 shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        새 채팅 시작하기
+      </button>
     </div>
-  </main>
+    <div class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider px-4 pt-4">최근 대화방 목록</div>
+    <div id="room-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+      <p class="text-xs text-gray-600 px-2 italic py-4">로그인 후 불러오는 중...</p>
+    </div>
+  </aside>
 
-  <footer class="p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
-    <div class="max-w-4xl w-full mx-auto relative space-y-3">
-      
-      <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
-        <labelfor="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
-        <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer">
-          <option value="light">Light HLS</option>
-          <option value="pro" selected>HLS PRO</option>
-        </select>
-        <span id="model-description" class="text-xs text-gray-400 italic transition-all">
-          HLS PRO는 고성능 모델입니다. 하지만 답변이 몇 분 걸릴 수 있습니다.
-        </span>
+  <div class="flex-1 flex flex-col min-w-0 h-full justify-between">
+    <header class="border-b border-gray-900 bg-[#0b0c10] px-6 py-4 flex justify-between items-center shrink-0">
+      <div class="flex items-center space-x-3">
+        <span id="current-room-title" class="font-bold text-sm text-gray-400 truncate">새로운 대화 세션</span>
       </div>
+    </header>
 
-      <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
-        <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required maxlength="5000"
-          class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
-        <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
-          <span id="char-counter" class="text-xs text-gray-500">0 / 5,000</span>
-          <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-            전송
-          </button>
+    <main id="chat-container" class="flex-1 overflow-y-auto p-6 max-w-4xl w-full mx-auto space-y-6">
+      <div id="welcome-message" class="text-center py-16 space-y-5">
+        <div class="flex justify-center">
+          <img src="https://github.com/FLY-H4N33/FLY-H4N-HLS/blob/main/HLSlogo.png?raw=true" alt="HLS Logo" class="logo-style">
         </div>
-      </form>
-    </div>
-  </footer>
+        <h1 class="text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
+        <p class="text-gray-400 max-w-md mx-auto text-sm">HLS Service : H4N 의 무료 LLM 서비스 (서비스 이용시 이용약관 동의로 간주함)</p>
+        <p class="text-gray-400 max-w-md mx-auto text-sm">이용약관 보기 : https://fly-h4n33.github.io/license_HLS </p>
+      </div>
+    </main>
+
+    <footer class="p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
+      <div class="max-w-4xl w-full mx-auto relative space-y-3">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
+          <label for="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
+          <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer">
+            <option value="light">Light HLS</option>
+            <option value="pro" selected>HLS PRO</option>
+          </select>
+          <span id="model-description" class="text-xs text-gray-400 italic transition-all">
+            HLS PRO는 고성능 모델입니다. 하지만 답변이 몇 분 걸릴 수 있습니다.
+          </span>
+        </div>
+
+        <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
+          <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required maxlength="5000"
+            class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
+          <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
+            <span id="char-counter" class="text-xs text-gray-500">0 / 5,000</span>
+            <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+              전송
+            </button>
+          </div>
+        </form>
+      </div>
+    </footer>
+  </div>
 
   <script>
     const WORKER_HTTP_URL = "https://hws.hanjungyeop33.workers.dev/"; 
@@ -136,6 +154,7 @@
     let chatHistory = []; 
     let userAccessKey = "";
     let isUserScrollingUp = false; 
+    let currentRoomId = ""; 
 
     const userInput = document.getElementById('user-input');
     const charCounter = document.getElementById('char-counter');
@@ -145,6 +164,8 @@
     const authSubmitBtn = document.getElementById('auth-submit-btn');
     const modelSelector = document.getElementById('model-selector');
     const modelDescription = document.getElementById('model-description');
+    const roomListContainer = document.getElementById('room-list');
+    const currentRoomTitle = document.getElementById('current-room-title');
 
     chatContainer.addEventListener('scroll', () => {
       const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 40;
@@ -166,6 +187,161 @@
       }
     }
 
+    function generateUUID() {
+      return 'room_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+
+    function startNewChat() {
+      currentRoomId = generateUUID();
+      chatHistory = [];
+      chatContainer.innerHTML = `
+        <div id="welcome-message" class="text-center py-16 space-y-5">
+          <div class="flex justify-center">
+            <img src="https://github.com/FLY-H4N33/FLY-H4N-HLS/blob/main/HLSlogo.png?raw=true" alt="HLS Logo" class="logo-style">
+          </div>
+          <h1 class="text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
+          <p class="text-gray-400 max-w-md mx-auto text-sm">HLS Service : H4N 의 무료 LLM 서비스 (서비스 이용시 이용약관 동의로 간주함)</p>
+          <p class="text-gray-400 max-w-md mx-auto text-sm">이용약관 보기 : https://fly-h4n33.github.io/license_HLS </p>
+        </div>
+      `;
+      currentRoomTitle.textContent = "새로운 대화 세션";
+      renderRoomListActiveState();
+    }
+
+    async function loadChatRooms() {
+      try {
+        const response = await fetch(WORKER_HTTP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
+          body: JSON.stringify({ action: "get_rooms" })
+        });
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        
+        roomListContainer.innerHTML = "";
+        if (!data.rooms || data.rooms.length === 0) {
+          roomListContainer.innerHTML = '<p class="text-xs text-gray-600 px-2 italic py-2">개설된 대화방이 없습니다.</p>';
+          return;
+        }
+
+        data.rooms.forEach(room => {
+          const btn = document.createElement('button');
+          btn.id = `room-btn-${room.id}`;
+          btn.onclick = () => switchChatRoom(room.id, room.title);
+          btn.className = "w-full text-left text-sm p-2 rounded-lg text-gray-400 hover:bg-gray-900 hover:text-white transition truncate block";
+          btn.textContent = room.title || "이전 대화방";
+          roomListContainer.appendChild(btn);
+        });
+        renderRoomListActiveState();
+      } catch (e) {
+        roomListContainer.innerHTML = '<p class="text-xs text-red-500 px-2 py-2">목록 로드 실패</p>';
+      }
+    }
+
+    async function switchChatRoom(roomId, title) {
+      if (currentRoomId === roomId) return;
+      currentRoomId = roomId;
+      currentRoomTitle.textContent = title || "이전 대화방";
+      chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-gray-500 animate-pulse">대화 기록을 동기화 중...</p>';
+      
+      renderRoomListActiveState();
+
+      try {
+        const response = await fetch(WORKER_HTTP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
+          body: JSON.stringify({ action: "get_history", roomId: roomId })
+        });
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        
+        chatContainer.innerHTML = "";
+        chatHistory = data.history || [];
+
+        if (chatHistory.length === 0) {
+          startNewChat();
+          return;
+        }
+
+        chatHistory.forEach(msg => {
+          if (msg.role === 'user') {
+            appendUserMessage(msg.content, false);
+          } else if (msg.role === 'assistant') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex w-full justify-start';
+            
+            // 💡 과거 내역 로드 시에도 추론 상태 가릴 수 있게 구조 맞춤 (과거 데이터에 reasoning 항목이 있을 수 있으므로)
+            const hasReasoning = !!msg.reasoning;
+            wrapper.innerHTML = `
+              <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">H4N EXPERT</div>
+                </div>
+                ${hasReasoning ? `
+                <button onclick="toggleThought(this)" class="text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+                  <span>▼ 추론 과정 접기</span>
+                </button>
+                <div class="thought-area border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n${msg.reasoning}</div>
+                ` : ''}
+                <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area">${marked.parse(msg.content)}</div>
+              </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            Prism.highlightAllIn(wrapper);
+            injectCopyButtons(wrapper.querySelector('.chat-content-area'));
+          }
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (e) {
+        chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-red-500">기록 로드 실패</p>';
+      }
+    }
+
+    function renderRoomListActiveState() {
+      const btns = roomListContainer.querySelectorAll('button');
+      btns.forEach(btn => {
+        if (btn.id === `room-btn-${currentRoomId}`) {
+          btn.classList.add('bg-gray-900', 'text-white', 'border-l-2', 'border-[#5865F2]');
+        } else {
+          btn.classList.remove('bg-gray-900', 'text-white', 'border-l-2', 'border-[#5865F2]');
+        }
+      });
+    }
+
+    // 💡 추론 레이어 토글(가리기/보이기) 처리 함수
+    function toggleThought(btn) {
+      const thoughtDiv = btn.nextElementSibling;
+      const span = btn.querySelector('span');
+      if (thoughtDiv.classList.contains('hidden')) {
+        thoughtDiv.classList.remove('hidden');
+        span.textContent = '▼ 추론 과정 접기';
+      } else {
+        thoughtDiv.classList.add('hidden');
+        span.textContent = '▶ 추론 과정 보기';
+      }
+    }
+
+    async function saveCurrentChatToKV() {
+      if (!currentRoomId || chatHistory.length === 0) return;
+      
+      const firstUserMsg = chatHistory.find(m => m.role === 'user')?.content || "새로운 대화";
+      const roomTitle = firstUserMsg.substring(0, 15) + (firstUserMsg.length > 15 ? "..." : "");
+
+      try {
+        await fetch(WORKER_HTTP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
+          body: JSON.stringify({ 
+            action: "save_history", 
+            roomId: currentRoomId, 
+            title: roomTitle,
+            history: chatHistory 
+          })
+        });
+        loadChatRooms(); 
+      } catch (e) {}
+    }
+
     async function validateKeyOnServer() {
       const inputVal = document.getElementById('secret-key-input').value.trim();
       if (inputVal === "") { 
@@ -181,10 +357,7 @@
       try {
         const response = await fetch(WORKER_HTTP_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Key": inputVal 
-          },
+          headers: { "Content-Type": "application/json", "X-Access-Key": inputVal },
           body: JSON.stringify({ action: "validate" })
         });
 
@@ -195,6 +368,9 @@
 
         userAccessKey = inputVal;
         document.getElementById('auth-overlay').classList.add('hidden');
+        
+        startNewChat();
+        loadChatRooms();
 
       } catch (error) {
         authError.textContent = error.message;
@@ -223,10 +399,12 @@
     }
 
     function createAssistantBubble() {
-      if (welcomeMessage) welcomeMessage.style.display = 'none';
+      const welcome = document.getElementById('welcome-message');
+      if (welcome) welcome.style.display = 'none';
       const wrapper = document.createElement('div');
       wrapper.className = 'flex w-full justify-start';
       
+      // 💡 추론 상태 레이어를 가릴 수 있도록 상단에 토글형 버튼 추가 조립
       wrapper.innerHTML = `
         <div class="max-w-[85%] sm:max-w-2xl rounded-2xl p-4 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
           <div class="flex justify-between items-center mb-2">
@@ -236,6 +414,9 @@
               <span class="animate-pulse">답변 생성 중</span>
             </div>
           </div>
+          <button id="thought-toggle-btn" onclick="toggleThought(this)" class="hidden text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+            <span>▼ 추론 과정 접기</span>
+          </button>
           <div class="thought-area hidden border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md"></div>
           <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area"></div>
         </div>
@@ -247,6 +428,7 @@
         wrapper: wrapper,
         contentArea: wrapper.querySelector('.chat-content-area'),
         thoughtArea: wrapper.querySelector('.thought-area'),
+        toggleBtn: wrapper.querySelector('#thought-toggle-btn'),
         indicator: wrapper.querySelector('.streaming-indicator')
       };
     }
@@ -279,8 +461,9 @@
       });
     }
 
-    function appendUserMessage(text) {
-      if (welcomeMessage) welcomeMessage.style.display = 'none';
+    function appendUserMessage(text, autoScroll = true) {
+      const welcome = document.getElementById('welcome-message');
+      if (welcome) welcome.style.display = 'none';
       const wrapper = document.createElement('div');
       wrapper.className = 'flex w-full justify-end';
       wrapper.innerHTML = `
@@ -290,7 +473,9 @@
         </div>
       `;
       chatContainer.appendChild(wrapper);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (autoScroll) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
     }
 
     function showLoading() {
@@ -333,6 +518,10 @@
       const text = userInput.value.trim();
       if (!text) return;
 
+      if (!currentRoomId) {
+        currentRoomId = generateUUID();
+      }
+
       appendUserMessage(text);
       chatHistory.push({ role: 'user', content: text });
       userInput.value = '';
@@ -346,7 +535,7 @@
       let bubbleElements = null;
       let buffer = ""; 
 
-      const socketUrl = `${WORKER_WS_URL}?key=${encodeURIComponent(userAccessKey)}`;
+      const socketUrl = `${WORKER_WS_URL}?key=${encodeURIComponent(userAccessKey)}&roomId=${encodeURIComponent(currentRoomId)}`;
       const socket = new WebSocket(socketUrl);
 
       socket.onopen = () => {
@@ -358,7 +547,6 @@
 
       socket.onmessage = (msgEvent) => {
         removeLoading();
-        
         buffer += msgEvent.data;
         const lines = buffer.split("\n");
         buffer = lines.pop(); 
@@ -368,8 +556,6 @@
           if (!cleanedLine || !cleanedLine.startsWith("data:")) continue;
 
           const jsonStr = cleanedLine.replace(/^data:\s*/, "");
-          
-          // 💡 [수정] [DONE] 신호가 오면 웹소켓을 닫기 전 즉시 화면 인디케이터부터 제거
           if (jsonStr === "[DONE]") {
             if (bubbleElements && bubbleElements.indicator) {
               bubbleElements.indicator.remove();
@@ -389,6 +575,8 @@
               }
 
               if (deltaReasoning) {
+                // 💡 추론 내용이 한 글자라도 들어오기 시작하면 토글 버튼 및 영역 활성화
+                bubbleElements.toggleBtn.classList.remove('hidden');
                 bubbleElements.thoughtArea.classList.remove('hidden');
                 thoughtText += deltaReasoning;
                 bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
@@ -410,7 +598,6 @@
 
       socket.onclose = (closeEvent) => {
         removeLoading();
-        // 💡 [안전장치] 어떤 이유로든 소켓이 닫히면 무조건 인디케이터 강제 제거
         if (bubbleElements && bubbleElements.indicator) {
           bubbleElements.indicator.remove();
         }
@@ -418,7 +605,11 @@
         if (bubbleElements && assistantText) {
           Prism.highlightAllIn(bubbleElements.wrapper);
           injectCopyButtons(bubbleElements.contentArea);
-          chatHistory.push({ role: 'assistant', content: assistantText });
+          
+          // 💡 히스토리 배열에 추론 내용도 분리해서 안전 저장 연동
+          chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
+          
+          saveCurrentChatToKV(); 
         }
         if (!closeEvent.wasClean && assistantText === "") {
           showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
