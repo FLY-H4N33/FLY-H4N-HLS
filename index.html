@@ -56,13 +56,12 @@
       animation: spin 0.8s linear infinite;
     }
 
-    /* 💡 로고 전용 커스텀 CSS 효과 */
     .logo-style {
       width: 80px;
       height: 80px;
       object-fit: cover;
       border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(88, 101, 242, 0.25); /* 웰컴 화면에 맞는 푸른 글로우 효과 */
+      box-shadow: 0 0 20px rgba(88, 101, 242, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.1);
       margin: 0 auto;
     }
@@ -107,7 +106,7 @@
     <div class="max-w-4xl w-full mx-auto relative space-y-3">
       
       <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
-        <label for="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
+        <labelfor="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
         <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer">
           <option value="light">Light HLS</option>
           <option value="pro" selected>HLS PRO</option>
@@ -369,7 +368,12 @@
           if (!cleanedLine || !cleanedLine.startsWith("data:")) continue;
 
           const jsonStr = cleanedLine.replace(/^data:\s*/, "");
+          
+          // 💡 [수정] [DONE] 신호가 오면 웹소켓을 닫기 전 즉시 화면 인디케이터부터 제거
           if (jsonStr === "[DONE]") {
+            if (bubbleElements && bubbleElements.indicator) {
+              bubbleElements.indicator.remove();
+            }
             socket.close(); 
             break;
           }
@@ -406,14 +410,14 @@
 
       socket.onclose = (closeEvent) => {
         removeLoading();
+        // 💡 [안전장치] 어떤 이유로든 소켓이 닫히면 무조건 인디케이터 강제 제거
+        if (bubbleElements && bubbleElements.indicator) {
+          bubbleElements.indicator.remove();
+        }
+
         if (bubbleElements && assistantText) {
           Prism.highlightAllIn(bubbleElements.wrapper);
           injectCopyButtons(bubbleElements.contentArea);
-          
-          if (bubbleElements.indicator) {
-            bubbleElements.indicator.remove();
-          }
-          
           chatHistory.push({ role: 'assistant', content: assistantText });
         }
         if (!closeEvent.wasClean && assistantText === "") {
@@ -422,6 +426,10 @@
       };
 
       socket.onerror = (error) => {
+        removeLoading();
+        if (bubbleElements && bubbleElements.indicator) {
+          bubbleElements.indicator.remove();
+        }
         showError("웹소켓 통신 중 장애가 발생했습니다.");
       };
     }
