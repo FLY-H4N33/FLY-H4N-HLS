@@ -183,16 +183,8 @@
     const currentRoomTitle = document.getElementById('current-room-title');
     const userTierBadge = document.getElementById('user-tier-badge'); 
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      if (userAccessKey) {
-        document.getElementById('auth-overlay').classList.add('hidden');
-        await validateKeyOnServer(userAccessKey);
-      }
-    });
-
-    // 서버 등급 정보를 기반으로 프론트엔드 UI를 갱신합니다.
+    // [핵심 변경] 수동 문자열 비교를 없애고 서버 데이터 동기화 함수로 일원화
     function applyUserTierConfig(tier, maxLimit) {
-      // 대소문자 예외 에러 방지를 위해 tier가 비어 있을 경우 기본값 처리
       userTier = (tier || "FREE").toUpperCase();
       maxInputLimit = maxLimit || 5000;
       
@@ -209,6 +201,14 @@
       userInput.setAttribute("maxlength", maxInputLimit);
       updateCharCounter();
     }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (userAccessKey) {
+        document.getElementById('auth-overlay').classList.add('hidden');
+        // 자동 로그인 시 즉시 서버를 통해 실제 등급 정보 동기화 요청
+        await validateKeyOnServer(userAccessKey);
+      }
+    });
 
     chatContainer.addEventListener('scroll', () => {
       const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 40;
@@ -392,6 +392,7 @@
       } catch (e) {}
     }
 
+    // [핵심 변경] 서버가 반환해주는 정확한 역할을 UI에 직접 세팅하도록 수정
     async function validateKeyOnServer(specificKey = null) {
       const inputVal = specificKey ? specificKey.trim() : document.getElementById('secret-key-input').value.trim();
       if (inputVal === "") { 
@@ -423,10 +424,13 @@
         localStorage.setItem("hls_access_key", userAccessKey);
         document.getElementById('auth-overlay').classList.add('hidden');
         
-        // 서버 응답에서 받아온 등급 정보 연동 (없을 시 비정상동작 방지용 기본값 추가)
-        applyUserTierConfig(resData.role || "free", resData.maxInputLimit || 5000);
+        // 서버 응답 바디의 role과 maxInputLimit을 안전하게 주입
+        applyUserTierConfig(resData.role || "FREE", resData.maxInputLimit || 5000);
         
-        startNewChat();
+        // 새로고침이나 첫 로드가 아닐 때에만 초기 세션 활성화
+        if (!specificKey) {
+          startNewChat();
+        }
         loadChatRooms();
 
       } catch (error) {
