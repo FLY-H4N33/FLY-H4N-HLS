@@ -152,15 +152,15 @@
             <option value="pro" selected>HLS PRO</option>
           </select>
           <span id="model-description" class="text-[11px] md:text-xs text-gray-400 italic transition-all block truncate">
-            HLS PRO는 고성능 모델입니다. 하지만 답변이 몇 분 걸릴 수 있습니다.
+            불러오는 중...
           </span>
         </div>
 
         <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
-          <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required maxlength="5000"
+          <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required
             class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
           <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
-            <span id="char-counter" class="text-xs text-gray-500">0 / 5,000</span>
+            <span id="char-counter" class="text-xs text-gray-500">0 / -</span>
             <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
               전송
             </button>
@@ -205,6 +205,7 @@
       }
     }
 
+    // [수정] 서버 등급 인증 정보 수신 시 한도 연동 로직 개편
     function applyUserTierConfig(tier, maxLimit) {
       userTier = (tier || "FREE").toUpperCase();
       maxInputLimit = maxLimit || 5000;
@@ -225,12 +226,16 @@
       
       userInput.setAttribute("maxlength", maxInputLimit);
       updateCharCounter();
+      updateModelDescription(); // 유저 정보 로드 후 모델 가이드라인 업데이트
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
       if (userAccessKey) {
         document.getElementById('auth-overlay').classList.add('hidden');
         await validateKeyOnServer(userAccessKey);
+      } else {
+        // 인증 전 기본 디폴트 텍스트 세팅
+        modelDescription.textContent = "인증 후 모델 정보를 확인할 수 있습니다.";
       }
     });
 
@@ -246,12 +251,28 @@
       }
     });
 
+    // [수정] 변경된 등급별/모델별 상세 일일 이용제한 조건 동적 안내 기능
     function updateModelDescription() {
       const selected = modelSelector.value;
-      if (selected === "light") {
-        modelDescription.textContent = "Light HLS는 가볍고 빠른 모델입니다. 그 대가로 낮은 성능을 지녔죠.";
-      } else {
-        modelDescription.textContent = "HLS PRO는 고성능 모델입니다. 하지만 답변이 몇 분 걸릴 수 있습니다.";
+      
+      if (userTier === "ELITE") {
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [ELITE 등급: 일일 사용량 무제한]";
+        } else {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
+        }
+      } else if (userTier === "PRO") {
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [PRO 등급: 일일 한도 30만 자]";
+        } else {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [PRO 등급: 일일 한도 1만 자]";
+        }
+      } else { // FREE 유저인 경우
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 5만 자]";
+        } else {
+          modelDescription.textContent = "⚠️ FREE 등급은 HLS PRO 모델을 이용할 수 없습니다. (전송 시 차단)";
+        }
       }
     }
 
