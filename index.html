@@ -762,9 +762,9 @@
                 lastActiveBubbleElements = bubbleElements;
               }
 
-              if (deltaReasoning) {
-                bubbleElements.toggleBtn.classList.remove('hidden');
-                bubbleElements.thoughtArea.classList.remove('hidden');
+             if (deltaReasoning) {
+                // 토글 버튼은 추론이 존재하므로 보여주되, 실제 내용 영역(.thought-area)은 hidden을 해제하지 않습니다.
+                bubbleElements.toggleBtn.classList.remove('hidden'); 
                 thoughtText += deltaReasoning;
                 currentInterruptedThoughtText = thoughtText;
               }
