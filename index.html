@@ -151,8 +151,9 @@
     const WORKER_HTTP_URL = "https://hws.hanjungyeop33.workers.dev/"; 
     const WORKER_WS_URL = "wss://hws.hanjungyeop33.workers.dev/"; 
 
+    // 💡 [개선] localStorage에서 저장된 고유 키를 자동으로 불러옵니다. (영구 유지)
+    let userAccessKey = localStorage.getItem("hls_access_key") || "";
     let chatHistory = []; 
-    let userAccessKey = "";
     let isUserScrollingUp = false; 
     let currentRoomId = ""; 
 
@@ -166,6 +167,15 @@
     const modelDescription = document.getElementById('model-description');
     const roomListContainer = document.getElementById('room-list');
     const currentRoomTitle = document.getElementById('current-room-title');
+
+    // 💡 [추가] 브라우저가 켜질 때 고유 키가 이미 존재한다면 인증창을 자동으로 패스하고 로드합니다.
+    window.addEventListener('DOMContentLoaded', () => {
+      if (userAccessKey) {
+        document.getElementById('auth-overlay').classList.add('hidden');
+        startNewChat();
+        loadChatRooms();
+      }
+    });
 
     chatContainer.addEventListener('scroll', () => {
       const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 40;
@@ -287,7 +297,7 @@
             `;
             chatContainer.appendChild(wrapper);
             
-            // 코드 하이라이팅 에러 안전 수정
+            // 💡 존재하지 않는 하이라이팅 함수 버그 안전하게 원천 해결
             if (typeof Prism !== 'undefined' && Prism.highlightAll) {
               Prism.highlightAll();
             }
@@ -374,6 +384,10 @@
         }
 
         userAccessKey = inputVal;
+        
+        // 💡 [추가] 서버 인증 성공 시 브라우저 스토리지에 고유 키 보관 (새로고침 유지의 핵심)
+        localStorage.setItem("hls_access_key", userAccessKey);
+
         document.getElementById('auth-overlay').classList.add('hidden');
         
         startNewChat();
