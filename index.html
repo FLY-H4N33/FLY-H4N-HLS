@@ -6,7 +6,7 @@
   <title>HLS Service</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
@@ -77,7 +77,7 @@
   <div id="auth-overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
     <div class="bg-gray-900 p-8 rounded-xl border border-gray-800 w-full max-w-md text-center shadow-2xl">
       <div class="mb-4 flex justify-center">
-        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">H4N</div>
+        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">HLS</div>
       </div>
       <h2 class="text-2xl font-bold mb-2">Access Key Required</h2>
       <p class="text-sm text-gray-400 mb-6">서비스를 이용하시려면 관리자에게 받은 고유 키를 입력해주세요.</p>
@@ -156,7 +156,6 @@
     const WORKER_HTTP_URL = "https://hws.hanjungyeop33.workers.dev/"; 
     const WORKER_WS_URL = "wss://hws.hanjungyeop33.workers.dev/"; 
 
-    // 💡 [개선] localStorage에서 저장된 고유 키를 자동으로 불러옵니다. (영구 유지)
     let userAccessKey = localStorage.getItem("hls_access_key") || "";
     let chatHistory = []; 
     let isUserScrollingUp = false; 
@@ -173,7 +172,6 @@
     const roomListContainer = document.getElementById('room-list');
     const currentRoomTitle = document.getElementById('current-room-title');
 
-    // 💡 [추가] 브라우저가 켜질 때 고유 키가 이미 존재한다면 인증창을 자동으로 패스하고 로드합니다.
     window.addEventListener('DOMContentLoaded', () => {
       if (userAccessKey) {
         document.getElementById('auth-overlay').classList.add('hidden');
@@ -302,7 +300,6 @@
             `;
             chatContainer.appendChild(wrapper);
             
-            // 💡 존재하지 않는 하이라이팅 함수 버그 안전하게 원천 해결
             if (typeof Prism !== 'undefined' && Prism.highlightAll) {
               Prism.highlightAll();
             }
@@ -389,8 +386,6 @@
         }
 
         userAccessKey = inputVal;
-        
-        // 💡 [추가] 서버 인증 성공 시 브라우저 스토리지에 고유 키 보관 (새로고침 유지의 핵심)
         localStorage.setItem("hls_access_key", userAccessKey);
 
         document.getElementById('auth-overlay').classList.add('hidden');
@@ -572,6 +567,17 @@
 
       socket.onmessage = (msgEvent) => {
         removeLoading();
+        
+        // 💡 만약 워커에서 에러 메시지 객체를 보냈다면 에러 처리 후 소켓 종료
+        try {
+          const rawData = JSON.parse(msgEvent.data);
+          if (rawData.error) {
+            showError(rawData.error);
+            socket.close();
+            return;
+          }
+        } catch (e) {}
+
         buffer += msgEvent.data;
         const lines = buffer.split("\n");
         buffer = lines.pop(); 
@@ -591,7 +597,8 @@
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const deltaReasoning = parsed.choices?.[0]?.delta?.reasoning;
+            // 💡 [수정] NVIDIA API 규격에 맞게 reasoning_content 와 reasoning 모두 호환되도록 파싱
+            const deltaReasoning = parsed.choices?.[0]?.delta?.reasoning_content || parsed.choices?.[0]?.delta?.reasoning;
             const deltaContent = parsed.choices?.[0]?.delta?.content;
 
             if (deltaReasoning || deltaContent) {
