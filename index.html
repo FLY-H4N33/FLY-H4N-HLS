@@ -193,7 +193,6 @@
 
     let renderTimeout = null;
     
-    // [이어하기 구현용 변수] 정상 완료 여부 체크용 플래그 및 버퍼
     let lastStreamWasClean = true; 
     let currentInterruptedAssistantText = "";
     let currentInterruptedThoughtText = "";
@@ -542,7 +541,7 @@
             <span>▶ 추론 과정 보기</span>
           </button>
           
-          <div class="thought-area hidden border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n${msg.reasoning}</div>
+          <div class="thought-area hidden border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n</div>
           
           <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area"></div>
         </div>
@@ -639,7 +638,6 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // [이어하기 핵심 로직] 비정상 종료 후 유저가 배너 클릭 시 강제 실행되는 컨티뉴 통신 함수
     function triggerContinueResponse() {
       continueBanner.classList.add('hidden');
       if (!currentInterruptedAssistantText) return;
@@ -647,10 +645,8 @@
       showLoading();
       isUserScrollingUp = false;
 
-      // 직전에 생성되다 끊겼던 말 풍선 요소들을 재활용하기 위해 연결 복구 타겟팅
       const bubbleElements = lastActiveBubbleElements;
       if (bubbleElements && !bubbleElements.wrapper.querySelector('.streaming-indicator')) {
-        // 끊겼던 버블 안에 상태 인디케이터 재생성
         const headerDiv = bubbleElements.wrapper.querySelector('.flex.justify-between');
         const ind = document.createElement('div');
         ind.className = "streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md";
@@ -659,10 +655,8 @@
         bubbleElements.indicator = ind;
       }
 
-      // 백엔드 AI에게 컨텍스트 유지를 지시하기 위해 임시 히스토리 복제본 생성
       let temporaryHistory = [...chatHistory];
       
-      // 끊긴 부분 바로 뒤부터 자연스럽게 대답하도록 유도하는 특수 유저 가이드라인을 주입
       temporaryHistory.push({
         role: "user",
         content: `[시스템 알림: 기술적 장애로 출력이 중간에 유실되었습니다. 당신이 직전에 쓰다 만 부분의 텍스트 조각은 다음과 같습니다: "${currentInterruptedAssistantText.slice(-150)}". 이전 답변 내용을 반복하지 말고, 정확히 끊긴 부분의 다음 문장/단어부터 이어서 계속 출력하세요.]`
@@ -698,7 +692,6 @@
       executeWebSocketStream(chatHistory, null);
     }
 
-    // [구조 분리] 일반 질문과 이어하기 모두 공통으로 처리할 수 있도록 소켓 로직 모듈화 및 안전성 강화
     function executeWebSocketStream(historyPayload, existingBubble = null) {
       let assistantText = currentInterruptedAssistantText || "";
       let thoughtText = currentInterruptedThoughtText || ""; 
@@ -737,7 +730,7 @@
 
           const jsonStr = cleanedLine.replace(/^data:\s*/, "");
           if (jsonStr === "[DONE]") {
-            lastStreamWasClean = true; // 서버가 안전하게 끝남을 명시함
+            lastStreamWasClean = true; 
             if (renderTimeout) clearTimeout(renderTimeout);
             if (bubbleElements) {
               if (thoughtText) bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
@@ -762,8 +755,7 @@
                 lastActiveBubbleElements = bubbleElements;
               }
 
-             if (deltaReasoning) {
-                // 토글 버튼은 추론이 존재하므로 보여주되, 실제 내용 영역(.thought-area)은 hidden을 해제하지 않습니다.
+              if (deltaReasoning) {
                 bubbleElements.toggleBtn.classList.remove('hidden'); 
                 thoughtText += deltaReasoning;
                 currentInterruptedThoughtText = thoughtText;
@@ -771,13 +763,10 @@
 
               if (deltaContent) {
                 assistantText += deltaContent;
-                currentInterruptedAssistantText = assistantText; // 장애 대비 전역 실시간 백업
+                currentInterruptedAssistantText = assistantText; 
               }
               
               if (!renderTimeout) {
-                // [프론트엔드 한계 돌파 최적화]
-                // 텍스트가 5,000자 이하일 때는 40ms 주기로 부드럽게 보여주고,
-                // 1,900줄(수만 자)에 가까워질수록 렌더링 주기(Delay)를 늘려 브라우저가 연산할 숨통을 틔워줍니다.
                 const renderDelay = assistantText.length > 20000 ? 250 : 40; 
               
                 renderTimeout = setTimeout(() => {
@@ -788,8 +777,6 @@
                   }
                   
                   if (deltaContent) {
-                    // 💡 텍스트가 너무 길면 매번 하이라이팅(Prism)을 무겁게 돌리지 않고, 
-                    // 스트리밍 중에는 단순 텍스트/마크다운만 밀어 넣고 소켓이 닫힐 때(onclose) 최종 정밀 렌더링을 수행합니다.
                     bubbleElements.contentArea.innerHTML = marked.parse(assistantText);
                   }
                   
@@ -811,7 +798,6 @@
           bubbleElements.indicator.remove();
         }
 
-        // [이어하기 체크 판정] [DONE] 사인을 못 받고 비정상 차단되었을 때 이어하기 배너 활성화
         if (!lastStreamWasClean && assistantText.length > 5) {
           continueBanner.classList.remove('hidden');
         }
@@ -822,7 +808,6 @@
           }
           injectCopyButtons(bubbleElements.contentArea);
           
-          // 기존 대화 이력이 있는 어시스턴트 메시지 세션이었는지 여부 판별하여 덮어쓰거나 push
           const lastHistoryIdx = chatHistory.length - 1;
           if (lastHistoryIdx >= 0 && chatHistory[lastHistoryIdx].role === 'assistant') {
             chatHistory[lastHistoryIdx].content = assistantText;
