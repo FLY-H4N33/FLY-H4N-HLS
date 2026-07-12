@@ -145,6 +145,15 @@
     <footer class="p-4 pb-6 md:p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
       <div class="max-w-4xl w-full mx-auto relative space-y-3">
         
+        <div id="continue-banner" class="hidden flex items-center justify-between bg-yellow-950 bg-opacity-60 border border-yellow-800 rounded-xl p-3 text-xs text-yellow-200 shadow-sm animate-fade-in">
+          <div class="flex items-center space-x-2">
+            <span>⚠️ 대용량 답변 출력 중 연결이 끊겼습니다. 이어서 받으시겠습니까?</span>
+          </div>
+          <button onclick="triggerContinueResponse()" class="bg-yellow-600 hover:bg-yellow-500 text-gray-950 font-bold px-3 py-1.5 rounded-lg transition">
+            이어서 답변받기 (Continue)
+          </button>
+        </div>
+
         <div class="flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
           <label for="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
           <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer w-full sm:w-auto">
@@ -182,8 +191,13 @@
     let maxInputLimit = 5000; 
     let userTier = "FREE";
 
-    // 브라우저 폭크 및 끊김 방지용 타이머 변수 (Throttling)
     let renderTimeout = null;
+    
+    // [이어하기 구현용 변수] 정상 완료 여부 체크용 플래그 및 버퍼
+    let lastStreamWasClean = true; 
+    let currentInterruptedAssistantText = "";
+    let currentInterruptedThoughtText = "";
+    let lastActiveBubbleElements = null;
 
     const userInput = document.getElementById('user-input');
     const charCounter = document.getElementById('char-counter');
@@ -195,6 +209,7 @@
     const modelDescription = document.getElementById('model-description');
     const roomListContainer = document.getElementById('room-list');
     const currentRoomTitle = document.getElementById('current-room-title');
+    const continueBanner = document.getElementById('continue-banner');
 
     function toggleSidebar(open) {
       const sidebar = document.getElementById('sidebar');
@@ -281,6 +296,7 @@
     }
 
     function startNewChat() {
+      continueBanner.classList.add('hidden');
       currentRoomId = generateUUID();
       chatHistory = [];
       chatContainer.innerHTML = `
@@ -329,6 +345,7 @@
 
     async function switchChatRoom(roomId, title) {
       if (currentRoomId === roomId) return;
+      continueBanner.classList.add('hidden');
       currentRoomId = roomId;
       currentRoomTitle.textContent = title || "이전 대화방";
       chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-gray-500 animate-pulse">대화 기록을 동기화 중...</p>';
@@ -619,10 +636,45 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
+    // [이어하기 핵심 로직] 비정상 종료 후 유저가 배너 클릭 시 강제 실행되는 컨티뉴 통신 함수
+    function triggerContinueResponse() {
+      continueBanner.classList.add('hidden');
+      if (!currentInterruptedAssistantText) return;
+      
+      showLoading();
+      isUserScrollingUp = false;
+
+      // 직전에 생성되다 끊겼던 말 풍선 요소들을 재활용하기 위해 연결 복구 타겟팅
+      const bubbleElements = lastActiveBubbleElements;
+      if (bubbleElements && !bubbleElements.wrapper.querySelector('.streaming-indicator')) {
+        // 끊겼던 버블 안에 상태 인디케이터 재생성
+        const headerDiv = bubbleElements.wrapper.querySelector('.flex.justify-between');
+        const ind = document.createElement('div');
+        ind.className = "streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md";
+        ind.innerHTML = `<div class="spinner"></div><span class="animate-pulse">이어서 작성 중</span>`;
+        headerDiv.appendChild(ind);
+        bubbleElements.indicator = ind;
+      }
+
+      // 백엔드 AI에게 컨텍스트 유지를 지시하기 위해 임시 히스토리 복제본 생성
+      let temporaryHistory = [...chatHistory];
+      
+      // 끊긴 부분 바로 뒤부터 자연스럽게 대답하도록 유도하는 특수 유저 가이드라인을 주입
+      temporaryHistory.push({
+        role: "user",
+        content: `[시스템 알림: 기술적 장애로 출력이 중간에 유실되었습니다. 당신이 직전에 쓰다 만 부분의 텍스트 조각은 다음과 같습니다: "${currentInterruptedAssistantText.slice(-150)}". 이전 답변 내용을 반복하지 말고, 정확히 끊긴 부분의 다음 문장/단어부터 이어서 계속 출력하세요.]`
+      });
+
+      lastStreamWasClean = false;
+      executeWebSocketStream(temporaryHistory, bubbleElements);
+    }
+
     async function handleSubmit(event) {
       event.preventDefault();
       const text = userInput.value.trim();
       if (!text) return;
+
+      continueBanner.classList.add('hidden');
 
       if (!currentRoomId) {
         currentRoomId = generateUUID();
@@ -635,10 +687,19 @@
       showLoading();
       
       isUserScrollingUp = false; 
+      lastStreamWasClean = false;
+      
+      currentInterruptedAssistantText = "";
+      currentInterruptedThoughtText = "";
 
-      let assistantText = "";
-      let thoughtText = ""; 
-      let bubbleElements = null;
+      executeWebSocketStream(chatHistory, null);
+    }
+
+    // [구조 분리] 일반 질문과 이어하기 모두 공통으로 처리할 수 있도록 소켓 로직 모듈화 및 안전성 강화
+    function executeWebSocketStream(historyPayload, existingBubble = null) {
+      let assistantText = currentInterruptedAssistantText || "";
+      let thoughtText = currentInterruptedThoughtText || ""; 
+      let bubbleElements = existingBubble;
       let buffer = ""; 
 
       const socketUrl = `${WORKER_WS_URL}?key=${encodeURIComponent(userAccessKey)}&roomId=${encodeURIComponent(currentRoomId)}`;
@@ -647,7 +708,7 @@
       socket.onopen = () => {
         socket.send(JSON.stringify({ 
           modelType: modelSelector.value,
-          messages: chatHistory 
+          messages: historyPayload 
         }));
       };
 
@@ -673,7 +734,7 @@
 
           const jsonStr = cleanedLine.replace(/^data:\s*/, "");
           if (jsonStr === "[DONE]") {
-            // 커넥션 종료 전 마지막으로 밀린 버퍼 내용 확정 렌더링
+            lastStreamWasClean = true; // 서버가 안전하게 끝남을 명시함
             if (renderTimeout) clearTimeout(renderTimeout);
             if (bubbleElements) {
               if (thoughtText) bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
@@ -695,22 +756,24 @@
             if (deltaReasoning || deltaContent) {
               if (!bubbleElements) {
                 bubbleElements = createAssistantBubble();
+                lastActiveBubbleElements = bubbleElements;
               }
 
               if (deltaReasoning) {
                 bubbleElements.toggleBtn.classList.remove('hidden');
                 bubbleElements.thoughtArea.classList.remove('hidden');
                 thoughtText += deltaReasoning;
+                currentInterruptedThoughtText = thoughtText;
               }
 
               if (deltaContent) {
                 assistantText += deltaContent;
+                currentInterruptedAssistantText = assistantText; // 장애 대비 전역 실시간 백업
               }
               
-              // [크롬 폭발 해결의 핵심] Throttled Rendering 적용 (40ms 주기로 모아서 화면을 갱신)
               if (!renderTimeout) {
                 renderTimeout = setTimeout(() => {
-                  renderTimeout = null; // 타이머 초기화
+                  renderTimeout = null; 
                   
                   if (deltaReasoning) {
                     bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
@@ -723,7 +786,7 @@
                   if (!isUserScrollingUp) {
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                   }
-                }, 40); // 1초에 약 25프레임만 렌더링하도록 강제 제한하여 부하 제어
+                }, 40); 
               }
             }
           } catch (e) { }
@@ -738,15 +801,28 @@
           bubbleElements.indicator.remove();
         }
 
+        // [이어하기 체크 판정] [DONE] 사인을 못 받고 비정상 차단되었을 때 이어하기 배너 활성화
+        if (!lastStreamWasClean && assistantText.length > 5) {
+          continueBanner.classList.remove('hidden');
+        }
+
         if (bubbleElements && assistantText) {
-          // 최종 정적 코드 하이라이팅 처리
           if (typeof Prism !== 'undefined' && Prism.highlightAll) {
             Prism.highlightAll();
           }
           injectCopyButtons(bubbleElements.contentArea);
-          chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
+          
+          // 기존 대화 이력이 있는 어시스턴트 메시지 세션이었는지 여부 판별하여 덮어쓰거나 push
+          const lastHistoryIdx = chatHistory.length - 1;
+          if (lastHistoryIdx >= 0 && chatHistory[lastHistoryIdx].role === 'assistant') {
+            chatHistory[lastHistoryIdx].content = assistantText;
+            chatHistory[lastHistoryIdx].reasoning = thoughtText || undefined;
+          } else {
+            chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
+          }
           saveCurrentChatToKV(); 
         }
+        
         if (!closeEvent.wasClean && assistantText === "") {
           showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
         }
@@ -758,7 +834,11 @@
         if (bubbleElements && bubbleElements.indicator) {
           bubbleElements.indicator.remove();
         }
-        showError("웹소켓 통신 중 장애가 발생했습니다.");
+        if (assistantText.length > 5) {
+          continueBanner.classList.remove('hidden');
+        } else {
+          showError("웹소켓 통신 중 장애가 발생했습니다.");
+        }
       };
     }
   </script>
