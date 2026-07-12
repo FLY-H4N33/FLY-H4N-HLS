@@ -772,21 +772,28 @@
               }
               
               if (!renderTimeout) {
+                // [프론트엔드 한계 돌파 최적화]
+                // 텍스트가 5,000자 이하일 때는 40ms 주기로 부드럽게 보여주고,
+                // 1,900줄(수만 자)에 가까워질수록 렌더링 주기(Delay)를 늘려 브라우저가 연산할 숨통을 틔워줍니다.
+                const renderDelay = assistantText.length > 20000 ? 250 : 40; 
+              
                 renderTimeout = setTimeout(() => {
                   renderTimeout = null; 
                   
                   if (deltaReasoning) {
                     bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
                   }
+                  
                   if (deltaContent) {
+                    // 💡 텍스트가 너무 길면 매번 하이라이팅(Prism)을 무겁게 돌리지 않고, 
+                    // 스트리밍 중에는 단순 텍스트/마크다운만 밀어 넣고 소켓이 닫힐 때(onclose) 최종 정밀 렌더링을 수행합니다.
                     bubbleElements.contentArea.innerHTML = marked.parse(assistantText);
-                    injectCopyButtons(bubbleElements.contentArea);
                   }
                   
                   if (!isUserScrollingUp) {
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                   }
-                }, 40); 
+                }, renderDelay); 
               }
             }
           } catch (e) { }
