@@ -185,7 +185,6 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       if (userAccessKey) {
-        // 저장된 키가 있는 경우 서버 검증 후 연동을 시도합니다.
         document.getElementById('auth-overlay').classList.add('hidden');
         await validateKeyOnServer(userAccessKey);
       }
@@ -193,8 +192,9 @@
 
     // 서버 등급 정보를 기반으로 프론트엔드 UI를 갱신합니다.
     function applyUserTierConfig(tier, maxLimit) {
-      userTier = tier.toUpperCase();
-      maxInputLimit = maxLimit;
+      // 대소문자 예외 에러 방지를 위해 tier가 비어 있을 경우 기본값 처리
+      userTier = (tier || "FREE").toUpperCase();
+      maxInputLimit = maxLimit || 5000;
       
       if (userTier === "ELITE") {
         userTierBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-200 uppercase tracking-wide";
@@ -423,8 +423,8 @@
         localStorage.setItem("hls_access_key", userAccessKey);
         document.getElementById('auth-overlay').classList.add('hidden');
         
-        // 백엔드가 제공해 준 권한 등급 명칭 및 제한값 적용
-        applyUserTierConfig(resData.role, resData.maxInputLimit);
+        // 서버 응답에서 받아온 등급 정보 연동 (없을 시 비정상동작 방지용 기본값 추가)
+        applyUserTierConfig(resData.role || "free", resData.maxInputLimit || 5000);
         
         startNewChat();
         loadChatRooms();
