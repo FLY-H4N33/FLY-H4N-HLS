@@ -213,26 +213,100 @@
               <label class="flex items-center space-x-2.5 p-2.5 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer"><input type="checkbox" id="regAgreeAll" onclick="toggleAuthAgreeAll(this)" class="w-4 h-4 text-blue-600 border-slate-300 rounded"><span class="text-xs font-bold text-slate-800">모든 이용 약관 및 고지 사항에 전체동의</span></label>
               <div class="space-y-2 pl-0.5">
                 <div><div class="flex items-center justify-between"><label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="regTos" class="reg-check-item w-4 h-4 text-blue-600 border-slate-300 rounded"><span class="text-xs text-slate-700">[필수] 서비스 이용약관 동의</span></label><button type="button" onclick="toggleTermsBox('boxTos')" class="text-[11px] text-slate-400 underline">보기</button></div><div id="boxTos" class="terms-scroll hidden max-h-40 overflow-y-auto p-3 bg-slate-50 border border-slate-200 rounded-lg text-[10.5px] text-slate-600 leading-relaxed whitespace-pre-wrap">제1조 (목적)
-본 약관은 H4N이 제공하는 AI 챗봇 서비스 HLS의 이용 조건, 권리·의무 및 책임 사항을 규정합니다.
+본 약관은 H4N(운영자)이 제공하는 AI 챗봇 서비스 HLS의 이용 조건, 권리·의무, 책임 사항을 규정함을 목적으로 합니다.
 
-제2조 (인증 키)
-이용자는 발급받은 Access Key를 본인만 사용해야 하며 타인에게 양도·공유·판매하거나 노출해서는 안 됩니다.
+제2조 (정의)
+1. "이용자": 본 약관에 동의하고 운영자로부터 고유 인증 키(Access Key)를 발급받아 서비스를 이용하는 자.
+2. "인증 키": 이용자 식별 및 인가를 위한 고유 문자열. 타인 양도/공유/판매 금지.
+3. "대화 데이터": 이용자가 입력한 프롬프트, 모델 응답, 메타데이터(타임스탬프, 모델명, 토큰 수 등).
+4. "무기한 이용권": 서비스 존속 기간 동안 약정 기능 이용 권한. 서비스 종료 시 소멸.
 
-제3조 (서비스 및 제한)
-서비스는 외부 AI API를 이용해 제공되며, 외부 API 장애·정책 변경·불가항력에 따라 모델 또는 기능이 변경·중단될 수 있습니다.
+제3조 (약관의 효력 및 변경)
+1. 본 약관은 이용자가 인증 키를 입력하여 서비스에 최초 접속(인증 성공)한 시점부터 효력 발생.
+2. 운영자는 법령 개정, 서비스 스펙 변경, 보안 강화 등을 위해 약관을 변경할 수 있으며, 변경 7일 전 서비스 웹페이지 공지로 갈음. (이용자 권리 축소 시 30일 전 고지)
 
-제4조 (이용자 의무)
-불법 행위, 서비스 공격, 과도한 요청, 민감정보 또는 악성코드 입력을 금지합니다. 생성물의 법적·윤리적 검증 책임은 이용자에게 있습니다.
+제4조 (이용계약의 성립 및 키 발급)
+1. 이용계약은 이용자의 신청 → 운영자 승인 → 인증 키 발급·전달 완료 시 성립.
+2. 운영자는 수동 심사를 통해 발급하며, 신청 사유 부적절·중복 신청·약관 위반 이력 시 거절 가능.
+3. FREE 티어는 별도 결제 없이 신청만으로 발급 가능(단, 승인 필요).
 
-제5조 (해지)
-이용자는 키 폐기를 요청할 수 있으며, 약관 위반 시 운영자는 키를 정지할 수 있습니다.</div></div>
+제5조 (서비스 내용 및 한도)
+1. 서비스 내용: 웹 인터페이스 제공, LLM 추론 프록시, 대화 저장/다운로드, 모델 선택, 프롬프트 템플릿.
+2. 요금제별 한도(일일 문자 수, 입력 길이, 모델 성능)는 '요금제 안내' 페이지 따름.
+3. 한도 상향(완화): 운영자 재량으로 사전 고지 후 언제든 적용 가능.
+4. 한도 하향/기능 제한: 외부 API 공급 중단, 법령 변경, 서버 장애 등 불가항력/중대 사유 발생 시 30일 전 고지 후 최소한으로 조정. 기존 구매자 혜택 최대한 보장.
+
+제6조 (데이터 수집, 보관, 위탁 및 이용자 의무)
+1. 수집 항목: 인증 키, 접속 IP/시간, 대화 데이터(프롬프트/응답 전문).
+2. 보관 기간: 서비스 이용계약 존속 중 영구 보관. 계약 해지(키 폐기) 요청 시 30일 내 파기 (단, 법령상 보관 의무 있는 로그 제외).
+3. 제3자 위탁(필수): 추론 연산을 위해 NVIDIA API, Mistral AI 등 외부 공급자에게 대화 데이터(텍스트) 전송.
+- 이용자는 위탁에 동의하지 않을 경우 서비스 이용 불가(키 발급 거절).
+4. 이용자 의무 (위반 시 키 즉시 정지, 환불 없음)
+- 인증 키 타인 양도/공유/판매/노출 금지.
+- 비밀번호, 주민등록번호, 신용카드번호, API 키, 기업 기밀, 악성코드 등 민감/위험 정보 입력 금지. (자동 필터링 우회 시도 포함)
+- 리버스 엔지니어링, 프롬프트 인젝션, 과도한 동시 요청(DoS), 스크래핑 등 서비스 안정성 해치는 행위 금지.
+- 생성된 출력물의 법적·윤리적 검증은 이용자 책임. 운영자는 환각/오류/편향에 대해 책임지지 않음.
+
+제7조 (면책 및 책임 제한)
+1. 운영자는 무료/외부 API 의존적 서비스 특성상 다음 사유로 인한 손해에 대해 배상 책임 없음.
+- 외부 API 장애/정책 변경/종료로 인한 모델 변경, 품질 저하, 기능 중단
+- 천재지변, 네트워크 장애, Cloudflare 인프라 장애 등 불가항력
+- 이용자 귀책(키 유출, 민감정보 입력, 불법 행위)
+- 생성 콘텐츠의 정확성, 완전성, 적법성, 특정 목적 적합성
+2. 손해배상 한도: 운영자 고의/중과실 외 손해배상 청구는 이용자가 지불한 총 결제 금액을 초과할 수 없음.
+
+제8조 (계약 해지 및 이용 중단)
+1. 이용자 해지: 언제든 키 폐기 요청 가능(운영자 연락처로 신청). 이용권 잔여 금액 환불 없음. (단, 서비스 영구 중단 시 제9조 적용)
+2. 운영자 해지/정지: 제6조 제4항 위반 시 사전 경고(1회) 후 키 비활성화. 중대 위반(불법 행위, 서비스 공격) 시 즉시 정지.
+3. 서비스 영구 중단(폐업): 운영자 사정으로 서비스 완전 종료 시 최소 30일 전 공지 후 종료.
+
+제9조 (서비스 중단 시 환불 특례)
+운영자 귀책(폐업, 장기 장애 등)으로 서비스가 영구 중단되어 이용계약 목적을 달성할 수 없게 된 경우, 중단 공지일 기준 환불액 = 결제금액 × (잔여일수 / 총 서비스 기준일수 365일(1년)) 산정하여 14일 내 지급. (무료 티어, 프로모션 할인 금액 제외)
+
+제10조 (분쟁 해결 및 관할)
+1. 분쟁 발생 시 운영자와 이용자는 신의성실 원칙 하에 협의 해결 우선.
+2. 협의 불성립 시 운영자 주소지 관할 법원 또는 대한상사중재원 중재로 해결.
+3. 준거법: 대한민국 법령.</div></div>
                 <div><div class="flex items-center justify-between"><label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="regPrivacy" class="reg-check-item w-4 h-4 text-blue-600 border-slate-300 rounded"><span class="text-xs text-slate-700">[필수] 개인정보 수집 및 이용 동의</span></label><button type="button" onclick="toggleTermsBox('boxPrivacy')" class="text-[11px] text-slate-400 underline">보기</button></div><div id="boxPrivacy" class="terms-scroll hidden max-h-40 overflow-y-auto p-3 bg-slate-50 border border-slate-200 rounded-lg text-[10.5px] text-slate-600 leading-relaxed whitespace-pre-wrap">수집 항목: Access Key, 연락처, 접속 IP·시간·User-Agent, 요청/응답 메타데이터 및 대화 내용.
 
-이용 목적: 이용자 인증, 서비스 제공, 한도·보안 관리, 대화 이력 제공 및 서비스 품질 개선.
+- 식별/인증: 고유 인증 키(Access Key), 연락처(디스코드 ID/이메일 등) - 이용자 신청 시 직접 입력
+- 자동 생성: 접속 IP, 접속 일시(User-Agent 포함), 요청/응답 메타데이터(모델, 토큰 수, 처리 시간) - 서비스 이용 과정 자동 생성
+- 대화 내용: 이용자가 입력한 프롬프트 전문, 모델 생성 응답 전문 - 채팅 콘솔 입력 시 자동 적재
+※ 회원가입/로그인 시스템 없음. 인증 키 기반 식별만 수행.
 
-보유 기간: 키 폐기 요청 시 원칙적으로 30일 내 파기합니다. 법령상 보관 의무가 있는 기록은 해당 기간 보관될 수 있습니다.
+2. 개인정보의 처리 목적
+- 서비스 제공 및 계약 이행: 이용자 식별, 인증, 요금제별 한도 관리, 추론 요청 라우팅, 대화 히스토리 제공/다운로드.
+- 보안 및 이상 탐지: 비인가 접근(키 도용/공유) 차단, 악성 페이로드/프롬프트 인젝션 탐지, Rate Limit 집행, 서비스 안정성 모니터링.
+- 외부 API 연동(위탁): NVIDIA, Mistral 등 외부 추론 인프라에 입력 텍스트 전송하여 결과 수신.
+- 서비스 품질 개선(익명화 후): 모델 성능 평가, 프롬프트 템플릿 개선, 버그 재현/디버깅. (개인 식별 정보 제거 후 활용)
 
-열람·정정·삭제·동의 철회는 운영자에게 요청할 수 있습니다.</div></div>
+3. 개인정보의 보유 및 이용 기간
+- 원칙: 이용계약 해지(키 폐기 요청) 시 지체 없이(30일 내) 파기.
+- 예외 (법령 근거): 통신비밀보호법(로그인 기록 3개월), 전자상거래법(결제/환불 기록 5년), 국세기본법(세금 증빙 5년).
+- 대화 데이터: 계약 해지 요청 시 백업본 포함 완전 삭제 원칙. (단, 익명화된 통계/학습 데이터는 보관 가능)
+
+4. 개인정보의 제3자 제공 및 위탁 (핵심: NVIDIA 등)
+- 수탁자: NVIDIA Corporation, Mistral AI, Cloudflare, Inc.
+- 위탁 목적: 인공지능 언어 모델의 실시간 추론 연산 대행, 서버리스 함수/스토리지/네트워크 프록시.
+- 위탁 항목: 사용자가 채팅 콘솔에 입력한 순수 텍스트 대화 데이터 히스토리, 접속 로그.
+- 중요: 위 위탁은 서비스 계약 이행을 위한 필수 사항이므로, 별도 동의 거부 시 서비스 이용(키 발급) 불가능합니다.
+- 외부 공급자(NVIDIA, Mistral)는 미국 등 해외 소재이므로, 데이터는 국외 이전되어 처리됩니다. (적절한 보호 조치 계약 체결)
+- 이용자는 민감정보(비밀번호, 주민번호, 카드번호, 기밀 코드 등) 입력 금지. 운영자는 자동 마스킹/차단 로직을 적용하나 100% 보장하지 않으며, 입력 시 책임은 이용자에게 있습니다.
+
+5. 개인정보의 파기 절차 및 방법
+- 파기 시점: 이용계약 해지 요청 접수일로부터 30일 이내. (단, 법령 보관 기간 경과 시 즉시)
+- 파기 방법: 전자적 파일(KV Store, R2, DB) 영구 삭제(Overwrite/Delete) 후 복구 불가 조치.
+
+6. 이용자 권리 및 행사 방법 (운영자 연락처로 요청)
+- 열람/제공: 본인 데이터(대화 내역, 로그) 사본 요청 → JSON/텍스트 파일 다운로드 링크 제공.
+- 정정/삭제: 오류 데이터 정정 요청, 대화 기록 전체/일부 삭제 요청 → 즉시 처리.
+- 처리 정지/동의 철회: 서비스 이용 중단(키 폐기) 요청 → 키 즉시 비활성화 및 데이터 파기 절차 개시.
+
+7. 개인정보 보호책임자 및 고충 처리
+- 보호책임자: H4N
+- 연락처: iamthespma@proton.me
+- 처리 기한: 접수일로부터 10일 내 답변/조치.
+- 권익 침해 구제: 개인정보분쟁조정위원회(1833-6972), 대검찰청 사이버수사과(1301), 경찰청 사이버수사국(182).</div></div></div>
                 <div><div class="flex items-center justify-between"><label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="regThirdParty" class="reg-check-item w-4 h-4 text-blue-600 border-slate-300 rounded"><span class="text-xs text-slate-700 font-bold">[필수] 제3자(외부 API) 제공/위탁 동의</span></label><button type="button" onclick="toggleTermsBox('boxThird')" class="text-[11px] text-red-500 underline font-medium">보기 (중요)</button></div><div id="boxThird" class="terms-scroll hidden max-h-40 overflow-y-auto p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10.5px] text-amber-800 leading-relaxed whitespace-pre-wrap font-medium">본 서비스는 NVIDIA API 및 Mistral AI API를 이용합니다.
 
 입력한 대화 내용(프롬프트·컨텍스트)은 추론을 위해 해외 소재 서버로 전송·처리됩니다. 이는 서비스 제공을 위한 필수 사항이므로 동의하지 않으면 키 발급이 불가능합니다.
