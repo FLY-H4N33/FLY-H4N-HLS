@@ -336,14 +336,6 @@
       </div>
       
       <!-- [신규] 내보내기 버튼 -->
-      <div class="flex items-center space-x-2 px-2">
-        <button onclick="exportChatAsText()" 
-                class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1.5 border border-gray-700"
-                title="현재 대화 내용을 텍스트 파일(.txt)로 저장합니다">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          대화 내보내기 (.txt)
-        </button>
-      </div>
 
       <div class="hidden md:flex px-2 pb-1 items-center space-x-2">
         <span class="text-xs text-gray-500 font-medium">계정 등급:</span>
@@ -354,6 +346,15 @@
         새 채팅 시작하기
       </button>
     </div>
+      <div class="flex items-center space-x-2 px-2">
+        <button onclick="exportChatAsText()" 
+                class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1.5 border border-gray-700"
+                title="현재 대화 내용을 텍스트 파일(.txt)로 저장합니다">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          대화 내보내기 (.txt)
+        </button>
+      </div>
+
     <div class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider px-4 pt-4">최근 대화방 목록</div>
     <div id="room-list" class="flex-1 overflow-y-auto p-2 space-y-1">
       <p class="text-xs text-gray-600 px-2 italic py-4">로그인 후 불러오는 중...</p>
