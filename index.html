@@ -8,41 +8,180 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
-    body {
-      font-family: 'Inter', 'Noto Sans KR', sans-serif;
-    }
-    .streaming-cursor::after {
-      content: "┃";
-      animation: blink 0.8s infinite;
-    }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-    pre { position: relative; margin: 0.5rem 0; padding: 1rem; border-radius: 0.5rem; background: #1e1e1e !important; overflow-x: auto; }
-    code { font-family: 'Fira Code', 'Courier New', Courier, monospace !important; font-size: 0.9rem; }
-    .copy-btn {
-      position: absolute; top: 0.5rem; right: 0.5rem;
-      background: rgba(255,255,255,0.1); color: #ccc;
-      border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem;
-      font-size: 0.75rem; cursor: pointer; transition: background 0.2s;
-    }
-    .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    body { background-color: #0b0c10; }
+    .bg-dark-card { background-color: #1f2833; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0c10; }
+    ::-webkit-scrollbar-thumb { background: #1f2833; border-radius: 3px; }
     
-    /* 약관 내부 스크롤바 최적화 */
-    .terms-scroll::-webkit-scrollbar { width: 5px; }
-    .terms-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-    .terms-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .terms-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    /* ===== 프로즈(마크다운 렌더링 영역) 커스텀 스타일 ===== */
+    .prose {
+      color: #e5e7eb !important;
+      font-size: 15px !important;
+      line-height: 1.8 !important;
+      max-width: none !important;
+    }
+    .prose p { margin-top: 1em; margin-bottom: 1em; }
+    .prose strong { color: #ffffff; font-weight: 600; }
+    .prose em { color: #d1d5db; font-style: italic; }
+    
+    /* 헤딩 */
+    .prose h1 { font-size: 1.6em; font-weight: 700; color: #fff; margin-top: 1.5em; margin-bottom: 0.5em; padding-bottom: 0.3em; border-bottom: 1px solid #374151; }
+    .prose h2 { font-size: 1.4em; font-weight: 700; color: #fff; margin-top: 1.5em; margin-bottom: 0.5em; }
+    .prose h3 { font-size: 1.2em; font-weight: 600; color: #e5e7eb; margin-top: 1.2em; margin-bottom: 0.4em; }
+    .prose h4 { font-size: 1.1em; font-weight: 600; color: #d1d5db; margin-top: 1em; margin-bottom: 0.4em; }
+    
+    /* 코드 블록 */
+    .prose pre { 
+      background-color: #0d1117 !important; 
+      border: 1px solid #30363d !important;
+      padding: 1.25rem !important; 
+      border-radius: 0.75rem !important; 
+      margin: 1.25rem 0 !important; 
+      overflow-x: auto;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .prose pre code { 
+      color: #e5e7eb !important; 
+      font-size: 14px !important;
+      line-height: 1.7 !important;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+      background: none !important;
+      padding: 0 !important;
+    }
+    .prose pre::-webkit-scrollbar { height: 6px; }
+    .prose pre::-webkit-scrollbar-thumb { background: #484f58; border-radius: 3px; }
+    
+    /* 인라인 코드 */
+    .prose :not(pre) > code { 
+      background-color: rgba(88, 101, 242, 0.15) !important; 
+      color: #c7d2fe !important; 
+      padding: 0.15em 0.45em !important; 
+      border-radius: 0.35rem !important; 
+      font-size: 0.9em !important; 
+      font-weight: 500 !important;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+      border: 1px solid rgba(88, 101, 242, 0.2);
+    }
+    .prose pre code { background: none !important; padding: 0 !important; border: none !important; }
+    
+    /* 리스트 */
+    .prose ul { list-style-type: disc; padding-left: 1.5em; margin: 1em 0; }
+    .prose ol { list-style-type: decimal; padding-left: 1.5em; margin: 1em 0; }
+    .prose li { margin: 0.5em 0; line-height: 1.7; }
+    .prose li::marker { color: #9ca3af; }
+    .prose li p { margin-top: 0.5em; margin-bottom: 0.5em; }
+    .prose li > ul, .prose li > ol { margin-top: 0.5em; margin-bottom: 0.5em; }
+    
+    /* 블록인용 */
+    .prose blockquote { 
+      border-left: 3px solid #5865F2; 
+      padding-left: 1.25rem; 
+      margin: 1.25rem 0; 
+      color: #9ca3af; 
+      font-style: italic; 
+      background: rgba(88, 101, 242, 0.05);
+      border-radius: 0 0.5rem 0.5rem 0;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .prose blockquote p { margin: 0; }
+    
+    /* 테이블 */
+    .prose table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.95em; }
+    .prose th, .prose td { border: 1px solid #374151; padding: 0.75rem 1rem; text-align: left; }
+    .prose th { background-color: #1f2937; font-weight: 600; color: #fff; }
+    .prose tr:nth-child(even) td { background-color: #111827; }
+    .prose tr:hover td { background-color: #1f2937; }
+    
+    /* 수평선 */
+    .prose hr { border-color: #374151; margin: 2rem 0; }
+    
+    /* 링크 */
+    .prose a { color: #93c5fd; text-decoration: underline; text-underline-offset: 2px; }
+    .prose a:hover { color: #bfdbfe; }
+    
+    /* 이미지 */
+    .prose img { border-radius: 0.5rem; margin: 1.25rem 0; max-width: 100%; height: auto; border: 1px solid #374151; }
+
+    /* 복사 버튼 */
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background-color: #161b22;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      padding: 0.35rem 0.7rem;
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      opacity: 0;
+      z-index: 10;
+    }
+    .prose pre:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover {
+      background-color: #5865F2;
+      color: #ffffff;
+      border-color: #5865F2;
+    }
+    .copy-btn.copied { background-color: #10B981; color: white; border-color: #10B981; opacity: 1; }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-top: 2px solid #5865F2;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+    }
+    .streaming-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.2em;
+      background-color: #5865F2;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s infinite;
+    }
+
+    .logo-style {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(88, 101, 242, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0 auto;
+    }
+    
+    /* 스크롤바 스타일 (채팅 컨테이너) */
+    #chat-container::-webkit-scrollbar { width: 8px; }
+    #chat-container::-webkit-scrollbar-track { background: transparent; }
+    #chat-container::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+    #chat-container::-webkit-scrollbar-thumb:hover { background: #4b5563; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased">
-
-  <div id="authOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+<body class="text-gray-200 h-[100dvh] flex flex-col md:flex-row font-sans overflow-hidden">
+<div id="authOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transition-all duration-300">
       
       <div class="flex border-b border-slate-100 bg-slate-50 p-1.5">
@@ -219,7 +358,7 @@
 
 7. 개인정보 보호책임자 및 고충 처리
 - 보호책임자: H4N
-- 연락처: [운영자 디스코드/이메일]
+- 연락처: iamthespma@proton.me
 - 처리 기한: 접수일로부터 10일 내 답변/조치.
 - 권익 침해 구제: 개인정보분쟁조정위원회(1833-6972), 대검찰청 사이버수사과(1301), 경찰청 사이버수사국(182).</div>
                 </div>
@@ -251,593 +390,778 @@
             </div>
 
             <button onclick="requestNewAccessKey()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-sm shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10">
-              무료 액세스 키 신청하기
+            액세스 키 신청하기
             </button>
           </div>
         </div>
       </div>
 
     </div>
+    <div id="auth-overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+    <div class="bg-gray-900 p-6 md:p-8 rounded-xl border border-gray-800 w-full max-w-md text-center shadow-2xl">
+      <div class="mb-4 flex justify-center">
+        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">HLS</div>
+      </div>
+      <h2 class="text-2xl font-bold mb-2">Access Key Required</h2>
+      <p class="text-sm text-gray-400 mb-6">서비스를 이용하시려면 관리자에게 받은 고유 키를 입력해주세요.</p>
+      <input type="password" id="secret-key-input" placeholder="고유 키를 입력하세요" 
+        class="w-full p-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5865F2] mb-4 text-center">
+      <button id="auth-submit-btn" onclick="validateKeyOnServer()" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium p-3 rounded-lg transition-colors flex justify-center items-center space-x-2">
+        <span>인증 및 접속하기</span>
+      </button>
+      <p id="auth-error" class="text-red-500 text-sm mt-3 hidden">키를 입력해주세요.</p>
+    </div>
   </div>
 
-  <div class="flex-1 flex overflow-hidden relative">
-    
-    <aside id="sidebar" class="w-64 bg-slate-950 flex flex-col border-r border-slate-800 fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0">
-      <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-        <h2 class="text-lg font-bold tracking-tight text-blue-400">HLS Chat Rooms</h2>
-        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white text-sm">닫기</button>
-      </div>
-      <div class="p-3">
-        <button onclick="createNewRoom()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors flex items-center justify-center space-x-2">
-          <span>+ 새로운 대화 시작</span>
+  <div id="sidebar-overlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-950 border-r border-gray-900 flex flex-col shrink-0 h-full z-30 transform -translate-x-full transition-transform duration-300 md:relative md:transform-none">
+    <div class="p-4 border-b border-gray-900 flex flex-col gap-2">
+      <div class="font-extrabold text-xl tracking-wider text-white px-2 py-1 flex items-center justify-between">
+        <span>H4N <span class="text-[#5865F2] text-sm font-normal">AI Chat</span></span>
+        <button onclick="toggleSidebar(false)" class="md:hidden text-gray-400 hover:text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
-      <div id="roomList" class="flex-1 overflow-y-auto px-2 space-y-1"></div>
-      <div class="p-4 border-t border-slate-800 text-xs text-slate-500 space-y-2">
-        <div class="flex justify-between items-center">
-          <span>등급: <span id="displayTier" class="font-bold text-slate-300">-</span></span>
-          <button onclick="logoutAuth()" class="text-red-400 hover:underline">로그아웃</button>
-        </div>
-        <div class="truncate">키: <span id="displayKey" class="font-mono text-slate-400">-</span></div>
+      <div class="hidden md:flex px-2 pb-1 items-center space-x-2">
+        <span class="text-xs text-gray-500 font-medium">계정 등급:</span>
+        <span id="user-tier-badge-pc" class="user-tier-badge text-[11px] font-bold px-2 py-0.5 rounded bg-gray-800 text-gray-400 uppercase tracking-wide">확인 중</span>
       </div>
-    </aside>
+      <button onclick="startNewChat(); toggleSidebar(false);" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-lg text-sm font-medium p-2.5 transition flex items-center justify-center gap-2 mt-1 shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        새 채팅 시작하기
+      </button>
+    </div>
+    <div class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider px-4 pt-4">최근 대화방 목록</div>
+    <div id="room-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+      <p class="text-xs text-gray-600 px-2 italic py-4">로그인 후 불러오는 중...</p>
+    </div>
+  </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 bg-slate-900 relative">
-      <header class="h-14 bg-slate-950/50 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4 z-30">
-        <div class="flex items-center space-x-3">
-          <button onclick="toggleSidebar()" class="md:hidden p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-lg">
-            ☰
-          </button>
-          <h1 id="currentRoomTitle" class="font-semibold text-sm sm:text-base text-slate-200 max-w-[180px] sm:max-w-xs truncate">새로운 대화</h1>
-        </div>
-        
-        <div class="flex items-center space-x-1.5 bg-slate-800 p-1 rounded-xl border border-slate-700">
-          <button id="btnModelLight" onclick="setModel('light')" class="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 text-white transition-all">
-            Light 모델
-          </button>
-          <button id="btnModelPro" onclick="setModel('pro')" class="px-3 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
-            Pro 추론
-          </button>
-        </div>
-      </header>
-
-      <div id="continueBanner" class="hidden bg-amber-950/60 border-b border-amber-800/60 text-amber-200 px-4 py-2.5 text-xs flex justify-between items-center z-20">
-        <span class="truncate">⚠️ 비정상적으로 출력이 중단되었습니다. 이어받기 프롬프트를 사용할 수 있습니다.</span>
-        <button onclick="triggerContinue()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-2.5 py-1 rounded transition-colors shrink-0 ml-2">
-          이어서 쓰기 명령
+  <div class="flex-1 flex flex-col min-w-0 h-full justify-between overflow-hidden">
+    <header class="border-b border-gray-900 bg-[#0b0c10] px-4 md:px-6 py-3.5 flex justify-between items-center shrink-0">
+      <div class="flex items-center space-x-3 min-w-0">
+        <button onclick="toggleSidebar(true)" class="md:hidden text-gray-400 hover:text-white p-1 focus:outline-none shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
-      </div>
-
-      <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div id="welcomeMessage" class="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
-          <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl font-bold">H</div>
-          <h3 class="text-base font-bold text-slate-200">무엇이든 물어보세요</h3>
-          <p class="text-xs text-slate-500 max-w-xs">HLS가 답변을 해줄 거예요!</p>
+        <div class="flex items-center space-x-1.5 shrink-0 bg-gray-950 px-2 py-1 rounded-lg border border-gray-900 md:hidden">
+          <span id="user-tier-badge-mobile" class="user-tier-badge text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 uppercase tracking-wide">확인 중</span>
         </div>
+        <span id="current-room-title" class="font-bold text-sm text-gray-400 truncate">새로운 대화 세션</span>
       </div>
+      <div class="text-xs md:text-sm font-bold tracking-wide text-white bg-gray-900 border border-gray-800 px-2.5 py-1 rounded-lg shadow-sm shrink-0">
+        HLS Service
+      </div>
+    </header>
 
-      <footer class="p-3 sm:p-4 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
-        <div class="max-w-3xl mx-auto relative">
-          <div class="flex items-end space-x-2 bg-slate-950 border border-slate-800 rounded-2xl p-2 focus-within:border-blue-500 transition-all">
-            <textarea id="messageInput" rows="1" oninput="adjustTextareaHeight(this)" placeholder="메시지를 입력하세요... (Shift+Enter 줄바꿈)" 
-              class="flex-1 bg-transparent border-0 resize-none max-h-40 outline-none text-sm p-2 text-slate-200 placeholder:text-slate-600 focus:ring-0"></textarea>
-            <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shrink-0">
-              <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2 7-9-7m9-7H3"></path></svg>
-            </button>
-          </div>
-          <div class="mt-1.5 text-[11px] text-slate-600 text-center">
-            HLS Chat Engine - 티어 정책에 따른 입력 한도가 자동으로 계산 적용됩니다.
-          </div>
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 max-w-4xl w-full mx-auto space-y-6">
+      <div id="welcome-message" class="text-center py-12 md:py-16 space-y-5">
+        <div class="flex justify-center">
+          <img src="https://github.com/FLY-H4N33/FLY-H4N-HLS/blob/main/HLSlogo.png?raw=true" alt="HLS Logo" class="logo-style">
         </div>
-      </footer>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
+        <p class="text-gray-400 max-w-md mx-auto text-xs md:text-sm px-4">HLS Service : H4N 의 무료 LLM 서비스 (서비스 이용시 이용약관 동의로 간주함)</p>
+        <p class="text-gray-400 max-w-md mx-auto text-xs md:text-sm px-4 break-all">이용약관 보기 : https://fly-h4n33.github.io/license_HLS </p>
+      </div>
     </main>
 
+    <footer class="p-4 pb-6 md:p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
+      <div class="max-w-4xl w-full mx-auto relative space-y-3">
+        
+        <div id="continue-banner" class="hidden flex items-center justify-between bg-yellow-950 bg-opacity-60 border border-yellow-800 rounded-xl p-3 text-xs text-yellow-200 shadow-sm animate-fade-in">
+          <div class="flex items-center space-x-2">
+            <span>⚠️ 대용량 답변 출력 중 연결이 끊겼습니다. 이어서 받으시겠습니까?</span>
+          </div>
+          <button onclick="triggerContinueResponse()" class="bg-yellow-600 hover:bg-yellow-500 text-gray-950 font-bold px-3 py-1.5 rounded-lg transition">
+            이어서 답변받기 (Continue)
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
+          <label for="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
+          <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer w-full sm:w-auto">
+            <option value="light">Light HLS</option>
+            <option value="pro" selected>HLS PRO</option>
+          </select>
+          <span id="model-description" class="text-[11px] md:text-xs text-gray-400 italic transition-all block truncate">
+            불러오는 중...
+          </span>
+        </div>
+
+        <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
+          <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required
+            class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
+          <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
+            <span id="char-counter" class="text-xs text-gray-500">0 / -</span>
+            <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+              전송
+            </button>
+          </div>
+        </form>
+      </div>
+    </footer>
   </div>
 
   <script>
-    // ── 백엔드 API 엔드포인트 바인딩 (실제 Worker 주소 입력 영역)
-    const WORKER_URL = "https://hws.hanjungyeop33.workers.dev";
+    const WORKER_HTTP_URL = "https://hws.hanjungyeop33.workers.dev/"; 
+    const WORKER_WS_URL = "wss://hws.hanjungyeop33.workers.dev/"; 
 
-    // ── 상태 관리 변수들
-    let clientAccessKey = "";
+    let userAccessKey = localStorage.getItem("hls_access_key") || "";
+    let chatHistory = []; 
+    let isUserScrollingUp = false; 
+    let currentRoomId = ""; 
+    
+    let maxInputLimit = 5000; 
     let userTier = "FREE";
-    let inputLimitChars = 6000;
-    
-    let chatRooms = [];
-    let currentRoomId = null;
-    let chatHistory = [];
-    let activeModelType = "light"; 
-    
-    let socket = null;
-    let lastStreamWasClean = true;
-    let isUserScrollingUp = false;
 
-    // ── 초기 로드 이벤트
-    window.addEventListener("DOMContentLoaded", () => {
-      const saved = localStorage.getItem("hls_access_key");
-      if (saved) {
-        document.getElementById("accessKeyInput").value = saved;
-        clientAccessKey = saved;
-        autoAuthenticate(saved);
+    let renderTimeout = null;
+    
+    let lastStreamWasClean = true; 
+    let currentInterruptedAssistantText = "";
+    let currentInterruptedThoughtText = "";
+    let lastActiveBubbleElements = null;
+
+    const userInput = document.getElementById('user-input');
+    const charCounter = document.getElementById('char-counter');
+    const chatContainer = document.getElementById('chat-container');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const authError = document.getElementById('auth-error');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const modelSelector = document.getElementById('model-selector');
+    const modelDescription = document.getElementById('model-description');
+    const roomListContainer = document.getElementById('room-list');
+    const currentRoomTitle = document.getElementById('current-room-title');
+    const continueBanner = document.getElementById('continue-banner');
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
       }
+    }
+
+    function applyUserTierConfig(tier, maxLimit) {
+      userTier = (tier || "FREE").toUpperCase();
+      maxInputLimit = maxLimit || 5000;
       
-      const container = document.getElementById("chatContainer");
-      container.addEventListener("scroll", () => {
-        if (container.scrollHeight - container.scrollTop > container.clientHeight + 100) {
-          isUserScrollingUp = true;
+      const badges = document.querySelectorAll('.user-tier-badge');
+      
+      badges.forEach(badge => {
+        if (userTier === "ELITE") {
+          badge.className = "user-tier-badge text-[11px] font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-200 uppercase tracking-wide";
+        } else if (userTier === "PRO") {
+          badge.className = "user-tier-badge text-[11px] font-bold px-2 py-0.5 rounded bg-blue-900 text-blue-200 uppercase tracking-wide";
         } else {
-          isUserScrollingUp = false;
+          userTier = "FREE";
+          badge.className = "user-tier-badge text-[11px] font-bold px-2 py-0.5 rounded bg-gray-800 text-gray-400 uppercase tracking-wide";
         }
+        badge.textContent = userTier;
       });
+      
+      userInput.setAttribute("maxlength", maxInputLimit);
+      updateCharCounter();
+      updateModelDescription();
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (userAccessKey) {
+        document.getElementById('auth-overlay').classList.add('hidden');
+        await validateKeyOnServer(userAccessKey);
+      } else {
+        modelDescription.textContent = "인증 후 모델 정보를 확인할 수 있습니다.";
+      }
     });
 
-    // ── 이용약관 및 로그인 제어 기능 
-    function switchAuthTab(target) {
-      const btnLogin = document.getElementById("tabLogin");
-      const btnReg = document.getElementById("tabRegister");
-      const panelLogin = document.getElementById("panelLogin");
-      const panelReg = document.getElementById("panelRegister");
-
-      if (target === 'login') {
-        btnLogin.className = "flex-1 py-3 text-center text-sm font-semibold rounded-xl transition-all text-blue-600 bg-white shadow-sm";
-        btnReg.className = "flex-1 py-3 text-center text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-800";
-        panelLogin.classList.remove("hidden");
-        panelReg.classList.add("hidden");
-      } else {
-        btnReg.className = "flex-1 py-3 text-center text-sm font-semibold rounded-xl transition-all text-blue-600 bg-white shadow-sm";
-        btnLogin.className = "flex-1 py-3 text-center text-sm font-semibold rounded-xl transition-all text-slate-500 hover:text-slate-800";
-        panelReg.classList.remove("hidden");
-        panelLogin.classList.add("hidden");
-      }
-    }
-
-    function toggleKeyVisibility() {
-      const input = document.getElementById("accessKeyInput");
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
-
-    function toggleTermsBox(id) {
-      document.getElementById(id).classList.toggle("hidden");
-    }
-
-    function toggleAuthAgreeAll(master) {
-      document.querySelectorAll(".reg-check-item").forEach(box => box.checked = master.checked);
-    }
-
-    document.querySelectorAll(".reg-check-item").forEach(item => {
-      item.addEventListener("change", () => {
-        const totalItems = document.querySelectorAll(".reg-check-item");
-        const checkedItems = document.querySelectorAll(".reg-check-item:checked");
-        document.getElementById("regAgreeAll").checked = (totalItems.length === checkedItems.length);
-      });
+    chatContainer.addEventListener('scroll', () => {
+      const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 40;
+      isUserScrollingUp = !isAtBottom;
     });
 
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("-translate-x-full");
-    }
+    document.getElementById('secret-key-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const inputVal = document.getElementById('secret-key-input').value.trim();
+        validateKeyOnServer(inputVal);
+      }
+    });
 
-    function adjustTextareaHeight(el) {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    }
-
-    function setModel(type) {
-      activeModelType = type;
-      const bLight = document.getElementById("btnModelLight");
-      const bPro = document.getElementById("btnModelPro");
-      if(type === 'pro') {
-        bPro.className = "px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 text-white transition-all";
-        bLight.className = "px-3 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+    function updateModelDescription() {
+      const selected = modelSelector.value;
+      
+      if (userTier === "ELITE") {
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [ELITE 등급: 일일 사용량 무제한]";
+        } else {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
+        }
+      } else if (userTier === "PRO") {
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [PRO 등급: 일일 한도 30만 자]";
+        } else {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [PRO 등급: 일일 한도 1만 자]";
+        }
       } else {
-        bLight.className = "px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 text-white transition-all";
-        bPro.className = "px-3 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+        if (selected === "light") {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 5만 자]";
+        } else {
+          modelDescription.textContent = "⚠️ FREE 등급은 HLS PRO 모델을 이용할 수 없습니다. (전송 시 차단)";
+        }
       }
     }
 
-    // ── 백엔드 연동 통신 로직 
-    async function autoAuthenticate(key) {
+    function generateUUID() {
+      return 'room_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+
+    function startNewChat() {
+      continueBanner.classList.add('hidden');
+      currentRoomId = generateUUID();
+      chatHistory = [];
+      chatContainer.innerHTML = `
+        <div id="welcome-message" class="text-center py-12 md:py-16 space-y-5">
+          <div class="flex justify-center">
+            <img src="https://github.com/FLY-H4N33/FLY-H4N-HLS/blob/main/HLSlogo.png?raw=true" alt="HLS Logo" class="logo-style">
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-white">무엇을 도와드릴까요?</h1>
+          <p class="text-gray-400 max-w-md mx-auto text-xs md:text-sm px-4">HLS Service : H4N 의 무료 LLM 서비스 (서비스 이용시 이용약관 동의로 간주함)</p>
+          <p class="text-gray-400 max-w-md mx-auto text-xs md:text-sm px-4 break-all">이용약관 보기 : https://fly-h4n33.github.io/license_HLS </p>
+        </div>
+      `;
+      currentRoomTitle.textContent = "새로운 대화 세션";
+      renderRoomListActiveState();
+    }
+
+    async function loadChatRooms() {
       try {
-        const res = await fetch(`${WORKER_URL}/`, {
+        const response = await fetch(WORKER_HTTP_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "X-Access-Key": key },
-          body: JSON.stringify({ action: "validate" })
-        });
-        const data = await res.json();
-        if(res.ok && data.success) {
-          executeSuccessfulLogin(key, data);
-        } else {
-          localStorage.removeItem("hls_access_key");
-        }
-      } catch { localStorage.removeItem("hls_access_key"); }
-    }
-
-    async function submitAccessKey() {
-      const key = document.getElementById("accessKeyInput").value.trim();
-      if(!key) return alert("액세스 키를 기입해주세요.");
-      
-      try {
-        const res = await fetch(`${WORKER_URL}/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Access-Key": key },
-          body: JSON.stringify({ action: "validate" })
-        });
-        const data = await res.json();
-        if(!res.ok) return alert(data.error || "인증 처리 실패");
-        
-        if(document.getElementById("rememberKey").checked) {
-          localStorage.setItem("hls_access_key", key);
-        } else {
-          localStorage.removeItem("hls_access_key");
-        }
-        
-        clientAccessKey = key;
-        executeSuccessfulLogin(key, data);
-      } catch(e) { alert("서버 통신 오류가 발생했습니다."); }
-    }
-
-    function executeSuccessfulLogin(key, data) {
-      userTier = data.role || "FREE";
-      inputLimitChars = data.maxInputLimit || 6000;
-      
-      document.getElementById("displayTier").innerText = userTier;
-      document.getElementById("displayKey").innerText = key;
-      document.getElementById("authOverlay").classList.add("hidden");
-      
-      fetchRoomListFromServer();
-    }
-
-    async function requestNewAccessKey() {
-      const contact = document.getElementById("regContact").value.trim();
-      const tos = document.getElementById("regTos").checked;
-      const privacy = document.getElementById("regPrivacy").checked;
-      const third = document.getElementById("regThirdParty").checked;
-      const marketing = document.getElementById("regMarketing").checked;
-
-      if(!contact) return alert("연락처 정보를 입력해 주세요.");
-      if(!tos || !privacy || !third) return alert("필수 약관 제공 동의가 필요합니다.");
-
-      try {
-        const res = await fetch(`${WORKER_URL}/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "register_key",
-            tier: "FREE",
-            contact: contact,
-            userAgent: navigator.userAgent,
-            consent: { tos, privacy, thirdparty: third, marketing }
-          })
-        });
-        const data = await res.json();
-        if(!res.ok) return alert(data.error || "신청 등록 오류");
-        
-        alert(data.message || "신청 성공");
-        switchAuthTab('login');
-      } catch { alert("서버 통신 실패"); }
-    }
-
-    function logoutAuth() {
-      localStorage.removeItem("hls_access_key");
-      location.reload();
-    }
-
-    // ── 대화방 제어 모듈
-    async function fetchRoomListFromServer() {
-      try {
-        const res = await fetch(`${WORKER_URL}/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Access-Key": clientAccessKey },
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
           body: JSON.stringify({ action: "get_rooms" })
         });
-        if(res.ok) {
-          const data = await res.json();
-          chatRooms = data.rooms || [];
-          renderRoomListUI();
-        }
-      } catch {}
-    }
-
-    function renderRoomListUI() {
-      const listDiv = document.getElementById("roomList");
-      listDiv.innerHTML = "";
-      chatRooms.forEach(room => {
-        const activeClass = room.id === currentRoomId ? 'bg-slate-800 text-blue-400 font-semibold border-l-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200';
-        const item = document.createElement("div");
-        item.className = `group flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition-all ${activeClass}`;
-        item.setAttribute("onclick", `selectChatRoom('${room.id}')`);
+        if (!response.ok) throw new Error();
+        const data = await response.json();
         
-        const titleSpan = document.createElement("span");
-        titleSpan.className = "truncate flex-1 pr-2";
-        titleSpan.innerText = room.title || "새로운 대화";
-        
-        item.appendChild(titleSpan);
-        listDiv.appendChild(item);
-      });
-    }
-
-    function createNewRoom() {
-      currentRoomId = "room_" + Date.now() + "_" + Math.random().toString(36).substring(2,7);
-      chatHistory = [];
-      document.getElementById("currentRoomTitle").innerText = "새로운 대화";
-      document.getElementById("chatContainer").innerHTML = "";
-      document.getElementById("welcomeMessage")?.remove();
-      document.getElementById("continueBanner").classList.add("hidden");
-      renderRoomListUI();
-      if(window.innerWidth < 768) toggleSidebar();
-    }
-
-    async function selectChatRoom(roomId) {
-      currentRoomId = roomId;
-      const target = chatRooms.find(r => r.id === roomId);
-      document.getElementById("currentRoomTitle").innerText = target ? target.title : "새로운 대화";
-      document.getElementById("continueBanner").classList.add("hidden");
-      
-      const container = document.getElementById("chatContainer");
-      container.innerHTML = `<div class="text-xs text-slate-500 text-center py-4 animate-pulse">대화 기록 불러오는 중...</div>`;
-      
-      try {
-        const res = await fetch(`${WORKER_URL}/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Access-Key": clientAccessKey },
-          body: JSON.stringify({ action: "get_history", roomId: roomId })
-        });
-        if(res.ok) {
-          const data = await res.json();
-          chatHistory = data.history || [];
-          renderFullHistoryUI();
-        }
-      } catch {
-        container.innerHTML = `<div class="text-xs text-red-400 text-center py-4">기록을 불러오지 못했습니다.</div>`;
-      }
-      renderRoomListUI();
-      if(window.innerWidth < 768) toggleSidebar();
-    }
-
-    function renderFullHistoryUI() {
-      const container = document.getElementById("chatContainer");
-      container.innerHTML = "";
-      if(chatHistory.length === 0) {
-        container.appendChild(document.getElementById("welcomeMessage"));
-        return;
-      }
-      chatHistory.forEach(msg => {
-        appendMessageBubble(msg.role, msg.content, msg.reasoning);
-      });
-      container.scrollTop = container.scrollHeight;
-    }
-
-    /* [복원] k.html의 본래 심플하고 직관적이었던 대화 버블 UI 디자인 완벽 복구 */
-    function appendMessageBubble(role, content, reasoning) {
-      document.getElementById("welcomeMessage")?.remove();
-      const container = document.getElementById("chatContainer");
-      
-      const wrap = document.createElement("div");
-      wrap.className = `flex flex-col ${role === 'user' ? 'items-end' : 'items-start'} space-y-1 w-full`;
-      
-      const label = document.createElement("span");
-      label.className = "text-[10px] text-slate-500 px-1 uppercase tracking-wider";
-      label.innerText = role === 'user' ? 'You' : 'AI Engine';
-      wrap.appendChild(label);
-
-      const bubble = document.createElement("div");
-      bubble.className = `max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed ${role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700/60'}`;
-      
-      if(role === 'assistant') {
-        const thoughtArea = document.createElement("div");
-        thoughtArea.className = "text-xs text-slate-400 bg-slate-900/50 p-2 border-l border-slate-600 rounded mb-2 font-mono whitespace-pre-wrap";
-        if(reasoning) {
-          thoughtArea.innerText = "🤔 생각 중:\n" + reasoning;
-        } else {
-          thoughtArea.classList.add("hidden");
-        }
-        bubble.appendChild(thoughtArea);
-        bubble.thoughtArea = thoughtArea;
-
-        const contentArea = document.createElement("div");
-        contentArea.className = "markdown-body";
-        contentArea.innerHTML = marked.parse(content || "");
-        bubble.appendChild(contentArea);
-        bubble.contentArea = contentArea;
-      } else {
-        bubble.innerText = content;
-      }
-      
-      wrap.appendChild(bubble);
-      container.appendChild(wrap);
-      
-      if(!isUserScrollingUp) container.scrollTop = container.scrollHeight;
-      
-      return bubble;
-    }
-
-    // ── 스트리밍 통신 로직 
-    function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const text = input.value.trim();
-      if(!text) return;
-      
-      if(text.length > inputLimitChars) {
-        return alert(`현재 등급 1회 입력 제한량(${inputLimitChars}자)을 넘었습니다. (현재: ${text.length}자)`);
-      }
-
-      if(!currentRoomId) {
-        currentRoomId = "room_" + Date.now();
-      }
-
-      appendMessageBubble("user", text);
-      chatHistory.push({ role: "user", content: text });
-      
-      input.value = "";
-      input.style.height = 'auto';
-      
-      initiateStreamingWS(false);
-    }
-
-    function triggerContinue() {
-      document.getElementById("continueBanner").classList.add("hidden");
-      appendMessageBubble("user", "[시스템 알림: 기술적 장애로 출력이 중간에 유실되었습니다. 생략하지 말고 유실 지점 뒤를 이어가세요.]");
-      chatHistory.push({ role: "user", content: "[시스템 알림: 기술적 장애로 출력이 중간에 유실되었습니다. 생략하지 말고 유실 지점 뒤를 이어가세요.]" });
-      initiateStreamingWS(true);
-    }
-
-    function initiateStreamingWS(isContinueMode) {
-      lastStreamWasClean = false;
-      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${wsProtocol}//${window.location.host}/?key=${encodeURIComponent(clientAccessKey)}`;
-      
-      const bubble = appendMessageBubble("assistant", "");
-      const indicator = document.createElement("div");
-      indicator.className = "text-xs text-blue-400 mt-1 flex items-center space-x-1 animate-pulse font-medium";
-      indicator.innerHTML = `<span>⚡ 엔진 연결 중...</span>`;
-      bubble.appendChild(indicator);
-      bubble.indicator = indicator;
-
-      if(socket) { try { socket.close(); }catch(e){} }
-      socket = new WebSocket(wsUrl);
-
-      let assistantText = "";
-      let thoughtText = "";
-      let renderTimeout = null;
-
-      socket.onopen = () => {
-        indicator.innerHTML = `<span>⚡ 실시간 스트리밍 수신 중...</span>`;
-        socket.send(JSON.stringify({
-          messages: chatHistory,
-          modelType: activeModelType
-        }));
-      };
-
-      socket.onmessage = (event) => {
-        const rawLine = event.data;
-        if(!rawLine.trim() || !rawLine.startsWith("data:")) return;
-        
-        const payload = rawLine.slice(5).trim();
-        if(payload === "[DONE]") {
-          lastStreamWasClean = true;
+        roomListContainer.innerHTML = "";
+        if (!data.rooms || data.rooms.length === 0) {
+          roomListContainer.innerHTML = '<p class="text-xs text-gray-600 px-2 italic py-2">개설된 대화방이 없습니다.</p>';
           return;
         }
 
-        try {
-          const parsed = JSON.parse(payload);
-          const delta = parsed?.choices?.[0]?.delta;
-          if(delta) {
-            let dr = delta.reasoning_content || "";
-            let dc = delta.content || "";
-            
-            if(dr) {
-              if(bubble.thoughtArea.classList.contains("hidden")) bubble.thoughtArea.classList.remove("hidden");
-              thoughtText += dr;
-            }
-            if(dc) {
-              assistantText += dc;
-            }
-
-            if(!renderTimeout) {
-              renderTimeout = setTimeout(() => {
-                renderTimeout = null;
-                if(dr && bubble.thoughtArea) bubble.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
-                if(dc && bubble.contentArea) bubble.contentArea.innerHTML = marked.parse(assistantText) + '<span class="streaming-cursor"></span>';
-                if(!isUserScrollingUp) {
-                  const container = document.getElementById("chatContainer");
-                  container.scrollTop = container.scrollHeight;
-                }
-              }, assistantText.length > 15000 ? 200 : 35);
-            }
-          }
-        } catch(e){}
-      };
-
-      socket.onclose = (ce) => {
-        if(renderTimeout) clearTimeout(renderTimeout);
-        if(bubble && bubble.indicator) bubble.indicator.remove();
-        
-        if(bubble && assistantText) {
-          bubble.contentArea.innerHTML = marked.parse(assistantText);
-          if(typeof Prism !== 'undefined') Prism.highlightAll();
-          injectCopyButtonsToCodes(bubble.contentArea);
-          
-          const idx = chatHistory.length - 1;
-          if(idx >= 0 && chatHistory[idx].role === 'assistant') {
-            chatHistory[idx].content = assistantText;
-            chatHistory[idx].reasoning = thoughtText || undefined;
-          } else {
-            chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
-          }
-          saveCurrentChatToKV();
-        }
-        
-        if(!lastStreamWasClean && assistantText.length > 5) {
-          document.getElementById("continueBanner").classList.remove("hidden");
-        }
-        if(!ce.wasClean && !assistantText) {
-          alert("네트워크 통신이 불안정하여 웹소켓 세션이 예기치 않게 끊어졌습니다.");
-        }
-      };
-
-      socket.onerror = () => {
-        if(bubble && bubble.indicator) bubble.indicator.remove();
-      };
+        data.rooms.forEach(room => {
+          const btn = document.createElement('button');
+          btn.id = `room-btn-${room.id}`;
+          btn.onclick = () => { switchChatRoom(room.id, room.title); toggleSidebar(false); };
+          btn.className = "w-full text-left text-sm p-2 rounded-lg text-gray-400 hover:bg-gray-900 hover:text-white transition truncate block";
+          btn.textContent = room.title || "이전 대화방";
+          roomListContainer.appendChild(btn);
+        });
+        renderRoomListActiveState();
+      } catch (e) {
+        roomListContainer.innerHTML = '<p class="text-xs text-red-500 px-2 py-2">목록 로드 실패</p>';
+      }
     }
 
-    async function saveCurrentChatToKV() {
-      if(!currentRoomId || chatHistory.length === 0) return;
+    async function switchChatRoom(roomId, title) {
+      if (currentRoomId === roomId) return;
+      continueBanner.classList.add('hidden');
+      currentRoomId = roomId;
+      currentRoomTitle.textContent = title || "이전 대화방";
+      chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-gray-500 animate-pulse">대화 기록을 동기화 중...</p>';
       
-      let title = "새로운 대화";
-      const firstUserMsg = chatHistory.find(m => m.role === 'user');
-      if(firstUserMsg) {
-        title = firstUserMsg.content.substring(0, 14) + (firstUserMsg.content.length > 14 ? "..." : "");
-      }
-      
-      const exist = chatRooms.find(r => r.id === currentRoomId);
-      if(!exist) {
-        chatRooms.unshift({ id: currentRoomId, title: title, timestamp: Date.now() });
-      } else {
-        exist.title = title;
-        chatRooms = chatRooms.filter(r => r.id !== currentRoomId);
-        chatRooms.unshift(exist);
-      }
-      document.getElementById("currentRoomTitle").innerText = title;
-      renderRoomListUI();
+      renderRoomListActiveState();
 
       try {
-        await fetch(`${WORKER_URL}/`, {
+        const response = await fetch(WORKER_HTTP_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "X-Access-Key": clientAccessKey },
-          body: JSON.stringify({
-            action: "save_history",
-            roomId: currentRoomId,
-            title: title,
-            history: chatHistory
-          })
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
+          body: JSON.stringify({ action: "get_history", roomId: roomId })
         });
-      } catch {}
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        
+        chatContainer.innerHTML = "";
+        chatHistory = data.history || [];
+
+        if (chatHistory.length === 0) {
+          startNewChat();
+          return;
+        }
+
+        chatHistory.forEach(msg => {
+          if (msg.role === 'user') {
+            appendUserMessage(msg.content, false);
+          } else if (msg.role === 'assistant') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex w-full justify-start';
+            
+            const hasReasoning = !!msg.reasoning;
+            wrapper.innerHTML = `
+              <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">H4N EXPERT</div>
+                </div>
+                ${hasReasoning ? `
+                <button onclick="toggleThought(this)" class="text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+                  <span>▶ 추론 과정 보기</span>
+                </button>
+                <div class="thought-area border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n${msg.reasoning}</div>
+                ` : ''}
+                <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area">${marked.parse(msg.content)}</div>
+              </div>
+            `;
+            chatContainer.appendChild(wrapper);
+            
+            if (typeof Prism !== 'undefined' && Prism.highlightAll) {
+              Prism.highlightAll();
+            }
+            
+            const contentArea = wrapper.querySelector('.chat-content-area');
+            if (contentArea) {
+              injectCopyButtons(contentArea);
+            }
+          }
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (e) {
+        console.error("대화 기록 로드 실패 사유:", e);
+        chatContainer.innerHTML = '<p class="text-center py-10 text-xs text-red-500">기록 로드 실패</p>';
+      }
     }
 
-    function injectCopyButtonsToCodes(targetEl) {
-      targetEl.querySelectorAll("pre").forEach(pre => {
-        if (pre.querySelector(".copy-btn")) return;
-        const btn = document.createElement("button");
-        btn.className = "copy-btn";
-        btn.innerText = "복사";
-        btn.onclick = () => {
-          const codeText = pre.querySelector("code")?.innerText || pre.innerText;
-          navigator.clipboard.writeText(codeText).then(() => {
-            btn.innerText = "완료";
-            setTimeout(() => btn.innerText = "복사", 2000);
-          });
-        };
-        pre.appendChild(btn);
+    function renderRoomListActiveState() {
+      const btns = roomListContainer.querySelectorAll('button');
+      btns.forEach(btn => {
+        if (btn.id === `room-btn-${currentRoomId}`) {
+          btn.classList.add('bg-gray-900', 'text-white', 'border-l-2', 'border-[#5865F2]');
+        } else {
+          btn.classList.remove('bg-gray-900', 'text-white', 'border-l-2', 'border-[#5865F2]');
+        }
       });
     }
 
-    document.getElementById("messageInput").addEventListener("keydown", (e) => {
-      if(e.key === 'Enter' && !e.shiftKey) {
-        if(window.innerWidth > 768) {
-          e.preventDefault();
-          sendMessage();
+    function toggleThought(btn) {
+      const thoughtDiv = btn.nextElementSibling;
+      const span = btn.querySelector('span');
+      if (thoughtDiv.classList.contains('hidden')) {
+        thoughtDiv.classList.remove('hidden');
+        span.textContent = '▼ 추론 과정 접기';
+      } else {
+        thoughtDiv.classList.add('hidden');
+        span.textContent = '▶ 추론 과정 보기';
+      }
+    }
+
+    async function saveCurrentChatToKV() {
+      if (!currentRoomId || chatHistory.length === 0) return;
+      
+      const firstUserMsg = chatHistory.find(m => m.role === 'user')?.content || "새로운 대화";
+      const roomTitle = firstUserMsg.substring(0, 15) + (firstUserMsg.length > 15 ? "..." : "");
+
+      try {
+        await fetch(WORKER_HTTP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Access-Key": userAccessKey },
+          body: JSON.stringify({ 
+            action: "save_history", 
+            roomId: currentRoomId, 
+            title: roomTitle,
+            history: chatHistory 
+          })
+        });
+        loadChatRooms(); 
+      } catch (e) {}
+    }
+
+    async function validateKeyOnServer(specificKey = null) {
+      const inputVal = specificKey ? specificKey.trim() : document.getElementById('secret-key-input').value.trim();
+      if (inputVal === "") { 
+        authError.textContent = "키를 입력해주세요.";
+        authError.classList.remove('hidden');
+        document.getElementById('auth-overlay').classList.remove('hidden');
+        return;
+      }
+
+      authSubmitBtn.disabled = true;
+      authSubmitBtn.innerHTML = "<span>검증 중...</span>";
+      authError.classList.add('hidden');
+
+      try {
+        const response = await fetch(WORKER_HTTP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Access-Key": inputVal },
+          body: JSON.stringify({ action: "validate" })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || "인증에 실패했습니다.");
         }
+
+        const resData = await response.json();
+
+        userAccessKey = inputVal;
+        localStorage.setItem("hls_access_key", userAccessKey);
+        document.getElementById('auth-overlay').classList.add('hidden');
+        
+        applyUserTierConfig(resData.role || "FREE", resData.maxInputLimit || 5000);
+        
+        if (!specificKey) {
+          startNewChat();
+        }
+        loadChatRooms();
+
+      } catch (error) {
+        authError.textContent = error.message;
+        authError.classList.remove('hidden');
+        document.getElementById('auth-overlay').classList.remove('hidden');
+        localStorage.removeItem("hls_access_key");
+      } finally {
+        authSubmitBtn.disabled = false;
+        authSubmitBtn.innerHTML = "<span>인증 및 접속하기</span>";
+      }
+    }
+
+    function updateCharCounter() {
+      charCounter.textContent = `${userInput.value.length.toLocaleString()} / ${maxInputLimit.toLocaleString()}`;
+    }
+
+    userInput.addEventListener('input', updateCharCounter);
+
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chat-form').requestSubmit();
       }
     });
+
+    function escapeHtml(string) {
+      return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '=': '&#x3D;' }[s];
+      });
+    }
+
+    function createAssistantBubble() {
+      const welcome = document.getElementById('welcome-message');
+      if (welcome) welcome.style.display = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex w-full justify-start';
+      
+      wrapper.innerHTML = `
+        <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">H4N EXPERT</div>
+            <div class="streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md">
+              <div class="spinner"></div>
+              <span class="animate-pulse">답변 생성 중</span>
+            </div>
+          </div>
+          
+          <button id="thought-toggle-btn" onclick="toggleThought(this)" class="hidden text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+            <span>▶ 추론 과정 보기</span>
+          </button>
+          
+          <div class="thought-area hidden border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n</div>
+          
+          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area"></div>
+        </div>
+      `;
+      chatContainer.appendChild(wrapper);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      
+      return {
+        wrapper: wrapper,
+        contentArea: wrapper.querySelector('.chat-content-area'),
+        thoughtArea: wrapper.querySelector('.thought-area'),
+        toggleBtn: wrapper.querySelector('#thought-toggle-btn'),
+        indicator: wrapper.querySelector('.streaming-indicator')
+      };
+    }
+
+    function injectCopyButtons(targetElement) {
+      const preBlocks = targetElement.querySelectorAll('pre');
+      preBlocks.forEach((pre) => {
+        if (pre.querySelector('.copy-btn')) return;
+
+        const button = document.createElement('button');
+        button.className = 'copy-btn';
+        button.innerText = '복사';
+
+        button.addEventListener('click', async () => {
+          const codeText = pre.querySelector('code')?.innerText || '';
+          try {
+            await navigator.clipboard.writeText(codeText);
+            button.innerText = '완료!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              button.innerText = '복사';
+              button.classList.remove('copied');
+            }, 2000);
+          } catch (err) {
+            button.innerText = '실패';
+            setTimeout(() => { button.innerText = '복사'; }, 1500);
+          }
+        });
+
+        pre.style.position = 'relative';
+        pre.appendChild(button);
+      });
+    }
+
+    function appendUserMessage(text, autoScroll = true) {
+      const welcome = document.getElementById('welcome-message');
+      if (welcome) welcome.style.display = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex w-full justify-end';
+      wrapper.innerHTML = `
+        <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-[#5865F2] text-white rounded-br-none shadow-md">
+          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">You</div>
+          <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">${escapeHtml(text)}</div>
+        </div>
+      `;
+      chatContainer.appendChild(wrapper);
+      if (autoScroll) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    function showLoading() {
+      const loader = document.createElement('div');
+      loader.id = 'loading-bubble';
+      loader.className = 'flex w-full justify-start';
+      loader.innerHTML = `
+        <div class="bg-gray-950 text-gray-400 border border-gray-800 rounded-2xl rounded-bl-none p-4 shadow-md w-24">
+          <div class="flex items-center space-x-2 justify-center">
+            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+          </div>
+        </div>
+      `;
+      chatContainer.appendChild(loader);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function removeLoading() {
+      const loader = document.getElementById('loading-bubble');
+      if (loader) loader.remove();
+    }
+
+    function showError(message) {
+      removeLoading();
+      const errWrapper = document.createElement('div');
+      errWrapper.className = 'flex w-full justify-center';
+      errWrapper.innerHTML = `
+        <div class="bg-red-900 bg-opacity-40 text-red-200 border border-red-800 text-xs px-4 py-2 rounded-lg">
+          🚨 에러 발생: ${message}
+        </div>
+      `;
+      chatContainer.appendChild(errWrapper);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function triggerContinueResponse() {
+      continueBanner.classList.add('hidden');
+      if (!currentInterruptedAssistantText) return;
+      
+      showLoading();
+      isUserScrollingUp = false;
+
+      const bubbleElements = lastActiveBubbleElements;
+      if (bubbleElements && !bubbleElements.wrapper.querySelector('.streaming-indicator')) {
+        const headerDiv = bubbleElements.wrapper.querySelector('.flex.justify-between');
+        const ind = document.createElement('div');
+        ind.className = "streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md";
+        ind.innerHTML = `<div class="spinner"></div><span class="animate-pulse">이어서 작성 중</span>`;
+        headerDiv.appendChild(ind);
+        bubbleElements.indicator = ind;
+      }
+
+      let temporaryHistory = [...chatHistory];
+      
+      temporaryHistory.push({
+        role: "user",
+        content: `[시스템 알림: 기술적 장애로 출력이 중간에 유실되었습니다. 당신이 직전에 쓰다 만 부분의 텍스트 조각은 다음과 같습니다: "${currentInterruptedAssistantText.slice(-150)}". 이전 답변 내용을 반복하지 말고, 정확히 끊긴 부분의 다음 문장/단어부터 이어서 계속 출력하세요.]`
+      });
+
+      lastStreamWasClean = false;
+      executeWebSocketStream(temporaryHistory, bubbleElements);
+    }
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      continueBanner.classList.add('hidden');
+
+      if (!currentRoomId) {
+        currentRoomId = generateUUID();
+      }
+
+      appendUserMessage(text);
+      chatHistory.push({ role: 'user', content: text });
+      userInput.value = '';
+      updateCharCounter(); 
+      showLoading();
+      
+      isUserScrollingUp = false; 
+      lastStreamWasClean = false;
+      
+      currentInterruptedAssistantText = "";
+      currentInterruptedThoughtText = "";
+
+      executeWebSocketStream(chatHistory, null);
+    }
+
+    function executeWebSocketStream(historyPayload, existingBubble = null) {
+      let assistantText = currentInterruptedAssistantText || "";
+      let thoughtText = currentInterruptedThoughtText || ""; 
+      let bubbleElements = existingBubble;
+      let buffer = ""; 
+
+      const socketUrl = `${WORKER_WS_URL}?key=${encodeURIComponent(userAccessKey)}&roomId=${encodeURIComponent(currentRoomId)}`;
+      const socket = new WebSocket(socketUrl);
+
+      socket.onopen = () => {
+        socket.send(JSON.stringify({ 
+          modelType: modelSelector.value,
+          messages: historyPayload 
+        }));
+      };
+
+      socket.onmessage = (msgEvent) => {
+        removeLoading();
+        
+        try {
+          const rawData = JSON.parse(msgEvent.data);
+          if (rawData.error) {
+            showError(rawData.error);
+            socket.close();
+            return;
+          }
+        } catch (e) {}
+
+        buffer += msgEvent.data;
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); 
+
+        for (const line of lines) {
+          const cleanedLine = line.trim();
+          if (!cleanedLine || !cleanedLine.startsWith("data:")) continue;
+
+          const jsonStr = cleanedLine.replace(/^data:\s*/, "");
+          if (jsonStr === "[DONE]") {
+            lastStreamWasClean = true; 
+            if (renderTimeout) clearTimeout(renderTimeout);
+            if (bubbleElements) {
+              if (thoughtText) bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
+              if (assistantText) {
+                bubbleElements.contentArea.innerHTML = marked.parse(assistantText);
+                injectCopyButtons(bubbleElements.contentArea);
+              }
+              if (bubbleElements.indicator) bubbleElements.indicator.remove();
+            }
+            socket.close(); 
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const deltaReasoning = parsed.choices?.[0]?.delta?.reasoning_content || parsed.choices?.[0]?.delta?.reasoning;
+            const deltaContent = parsed.choices?.[0]?.delta?.content;
+
+            if (deltaReasoning || deltaContent) {
+              if (!bubbleElements) {
+                bubbleElements = createAssistantBubble();
+                lastActiveBubbleElements = bubbleElements;
+              }
+
+              if (deltaReasoning) {
+                bubbleElements.toggleBtn.classList.remove('hidden'); 
+                thoughtText += deltaReasoning;
+                currentInterruptedThoughtText = thoughtText;
+              }
+
+              if (deltaContent) {
+                assistantText += deltaContent;
+                currentInterruptedAssistantText = assistantText; 
+              }
+              
+              if (!renderTimeout) {
+                const renderDelay = assistantText.length > 20000 ? 250 : 40; 
+              
+                renderTimeout = setTimeout(() => {
+                  renderTimeout = null; 
+                  
+                  if (deltaReasoning) {
+                    bubbleElements.thoughtArea.innerText = "🤔 생각 중:\n" + thoughtText;
+                  }
+                  
+                  if (deltaContent) {
+                    // 스트리밍 중 커서 표시를 위해 임시로 커서 추가
+                    bubbleElements.contentArea.innerHTML = marked.parse(assistantText) + '<span class="streaming-cursor"></span>';
+                  }
+                  
+                  if (!isUserScrollingUp) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                  }
+                }, renderDelay); 
+              }
+            }
+          } catch (e) { }
+        }
+      };
+
+      socket.onclose = (closeEvent) => {
+        removeLoading();
+        if (renderTimeout) clearTimeout(renderTimeout);
+        
+        if (bubbleElements && bubbleElements.indicator) {
+          bubbleElements.indicator.remove();
+        }
+
+        if (!lastStreamWasClean && assistantText.length > 5) {
+          continueBanner.classList.remove('hidden');
+        }
+
+        if (bubbleElements && assistantText) {
+          if (typeof Prism !== 'undefined' && Prism.highlightAll) {
+            Prism.highlightAll();
+          }
+          injectCopyButtons(bubbleElements.contentArea);
+          
+          const lastHistoryIdx = chatHistory.length - 1;
+          if (lastHistoryIdx >= 0 && chatHistory[lastHistoryIdx].role === 'assistant') {
+            chatHistory[lastHistoryIdx].content = assistantText;
+            chatHistory[lastHistoryIdx].reasoning = thoughtText || undefined;
+          } else {
+            chatHistory.push({ role: 'assistant', content: assistantText, reasoning: thoughtText || undefined });
+          }
+          saveCurrentChatToKV(); 
+        }
+        
+        if (!closeEvent.wasClean && assistantText === "") {
+          showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
+        }
+      };
+
+      socket.onerror = (error) => {
+        removeLoading();
+        if (renderTimeout) clearTimeout(renderTimeout);
+        if (bubbleElements && bubbleElements.indicator) {
+          bubbleElements.indicator.remove();
+        }
+        if (assistantText.length > 5) {
+          continueBanner.classList.remove('hidden');
+        } else {
+          showError("웹소켓 통신 중 장애가 발생했습니다.");
+        }
+      };
+    }
   </script>
 </body>
 </html>
