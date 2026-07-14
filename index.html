@@ -219,7 +219,7 @@
 
 7. 개인정보 보호책임자 및 고충 처리
 - 보호책임자: H4N
-- 연락처: iamthespma@proton.me
+- 연락처: [운영자 디스코드/이메일]
 - 처리 기한: 접수일로부터 10일 내 답변/조치.
 - 권익 침해 구제: 개인정보분쟁조정위원회(1833-6972), 대검찰청 사이버수사과(1301), 경찰청 사이버수사국(182).</div>
                 </div>
@@ -251,7 +251,7 @@
             </div>
 
             <button onclick="requestNewAccessKey()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-sm shadow-sm transition-all focus:ring-4 focus:ring-blue-500/10">
-            액세스 키 신청하기
+              무료 액세스 키 신청하기
             </button>
           </div>
         </div>
@@ -272,8 +272,7 @@
           <span>+ 새로운 대화 시작</span>
         </button>
       </div>
-      <div id="roomList" class="flex-1 overflow-y-auto px-2 space-y-1">
-        </div>
+      <div id="roomList" class="flex-1 overflow-y-auto px-2 space-y-1"></div>
       <div class="p-4 border-t border-slate-800 text-xs text-slate-500 space-y-2">
         <div class="flex justify-between items-center">
           <span>등급: <span id="displayTier" class="font-bold text-slate-300">-</span></span>
@@ -313,7 +312,7 @@
         <div id="welcomeMessage" class="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
           <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl font-bold">H</div>
           <h3 class="text-base font-bold text-slate-200">무엇이든 물어보세요</h3>
-          <p class="text-xs text-slate-500 max-w-xs">HLS가 답변을 해줄 거예요! (민감한 정보 입력은 주의해 주세요)</p>
+          <p class="text-xs text-slate-500 max-w-xs">HLS가 답변을 해줄 거예요!</p>
         </div>
       </div>
 
@@ -323,7 +322,7 @@
             <textarea id="messageInput" rows="1" oninput="adjustTextareaHeight(this)" placeholder="메시지를 입력하세요... (Shift+Enter 줄바꿈)" 
               class="flex-1 bg-transparent border-0 resize-none max-h-40 outline-none text-sm p-2 text-slate-200 placeholder:text-slate-600 focus:ring-0"></textarea>
             <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-colors shrink-0">
-              <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l92 7-9-7m9-7H3"></path></svg>
+              <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2 7-9-7m9-7H3"></path></svg>
             </button>
           </div>
           <div class="mt-1.5 text-[11px] text-slate-600 text-center">
@@ -336,10 +335,10 @@
   </div>
 
   <script>
-    // ── 백엔드 API 엔드포인트 바인딩 (배포 URL에 맞춰 수정 가능)
-    const WORKER_URL = "https://hws.hanjungyeop33.workers.dev";
+    // ── 백엔드 API 엔드포인트 바인딩 (실제 Worker 주소 입력 영역)
+    const WORKER_URL = window.location.origin;
 
-    // ── 상태 관리 상태값
+    // ── 상태 관리 변수들
     let clientAccessKey = "";
     let userTier = "FREE";
     let inputLimitChars = 6000;
@@ -353,7 +352,7 @@
     let lastStreamWasClean = true;
     let isUserScrollingUp = false;
 
-    // ── 문서 로드 초기화 시점
+    // ── 초기 로드 이벤트
     window.addEventListener("DOMContentLoaded", () => {
       const saved = localStorage.getItem("hls_access_key");
       if (saved) {
@@ -362,7 +361,6 @@
         autoAuthenticate(saved);
       }
       
-      // 스크롤 이벤트 감지
       const container = document.getElementById("chatContainer");
       container.addEventListener("scroll", () => {
         if (container.scrollHeight - container.scrollTop > container.clientHeight + 100) {
@@ -373,7 +371,7 @@
       });
     });
 
-    // ── UI 인터랙션 제어: 탭 및 아코디언 컴포넌트
+    // ── 이용약관 및 로그인 제어 기능 
     function switchAuthTab(target) {
       const btnLogin = document.getElementById("tabLogin");
       const btnReg = document.getElementById("tabRegister");
@@ -406,7 +404,6 @@
       document.querySelectorAll(".reg-check-item").forEach(box => box.checked = master.checked);
     }
 
-    // 개별 체크 해제 시 전체동의 연동 처리
     document.querySelectorAll(".reg-check-item").forEach(item => {
       item.addEventListener("change", () => {
         const totalItems = document.querySelectorAll(".reg-check-item");
@@ -437,7 +434,7 @@
       }
     }
 
-    // ── 백엔드 API 연동 모듈 영역
+    // ── 백엔드 연동 통신 로직 
     async function autoAuthenticate(key) {
       try {
         const res = await fetch(`${WORKER_URL}/`, {
@@ -524,7 +521,7 @@
       location.reload();
     }
 
-    // ── 대화 관리 및 히스토리 핸들링
+    // ── 대화방 제어 모듈
     async function fetchRoomListFromServer() {
       try {
         const res = await fetch(`${WORKER_URL}/`, {
@@ -609,6 +606,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
+    /* [복원] k.html의 본래 심플하고 직관적이었던 대화 버블 UI 디자인 완벽 복구 */
     function appendMessageBubble(role, content, reasoning) {
       document.getElementById("welcomeMessage")?.remove();
       const container = document.getElementById("chatContainer");
@@ -624,7 +622,6 @@
       const bubble = document.createElement("div");
       bubble.className = `max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed ${role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700/60'}`;
       
-      // 추론 영역 모델 패치
       if(role === 'assistant') {
         const thoughtArea = document.createElement("div");
         thoughtArea.className = "text-xs text-slate-400 bg-slate-900/50 p-2 border-l border-slate-600 rounded mb-2 font-mono whitespace-pre-wrap";
@@ -653,7 +650,7 @@
       return bubble;
     }
 
-    // ── 웹소켓 실시간 스트리밍 중계 섹션
+    // ── 스트리밍 통신 로직 
     function sendMessage() {
       const input = document.getElementById("messageInput");
       const text = input.value.trim();
@@ -688,7 +685,6 @@
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${wsProtocol}//${window.location.host}/?key=${encodeURIComponent(clientAccessKey)}`;
       
-      // 버블 생성 및 지시자 인가
       const bubble = appendMessageBubble("assistant", "");
       const indicator = document.createElement("div");
       indicator.className = "text-xs text-blue-400 mt-1 flex items-center space-x-1 animate-pulse font-medium";
@@ -760,7 +756,6 @@
           if(typeof Prism !== 'undefined') Prism.highlightAll();
           injectCopyButtonsToCodes(bubble.contentArea);
           
-          // 기존 대화 이력 덮어쓰기 정산
           const idx = chatHistory.length - 1;
           if(idx >= 0 && chatHistory[idx].role === 'assistant') {
             chatHistory[idx].content = assistantText;
@@ -793,13 +788,11 @@
         title = firstUserMsg.content.substring(0, 14) + (firstUserMsg.content.length > 14 ? "..." : "");
       }
       
-      // 타이틀 동기화
       const exist = chatRooms.find(r => r.id === currentRoomId);
       if(!exist) {
         chatRooms.unshift({ id: currentRoomId, title: title, timestamp: Date.now() });
       } else {
         exist.title = title;
-        // 맨 앞으로 끌어올리기
         chatRooms = chatRooms.filter(r => r.id !== currentRoomId);
         chatRooms.unshift(exist);
       }
@@ -837,7 +830,6 @@
       });
     }
 
-    // 엔터키 핸들러 인가
     document.getElementById("messageInput").addEventListener("keydown", (e) => {
       if(e.key === 'Enter' && !e.shiftKey) {
         if(window.innerWidth > 768) {
