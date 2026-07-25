@@ -520,26 +520,26 @@
       if (userTier === "ELITE") {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [ELITE 등급: 일일 사용량 무제한]";
-        } if (selected === "pro") {
+        } else if (selected === "pro") {
           modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
-        } else{
-          modelDescription.textContent = "HLS PRO - ULTRA (최고 능력 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
+        } else {
+          modelDescription.textContent = "HLS PRO-ULTRA (초고성능 심층 추론 · Self-Correction) - [ELITE 등급: 일일 사용량 무제한]";
         }
       } else if (userTier === "PRO") {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [PRO 등급: 일일 한도 30만 자]";
-        } if (selected === "pro") {
+        } else if (selected === "pro") {
           modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [PRO 등급: 일일 한도 10만 자]";
-        } else{
-          modelDescription.textContent = "HLS ULTRA (최고 능력 추론 및 사고) - [PRO 모델과 한도 공유]";
+        } else {
+          modelDescription.textContent = "HLS PRO-ULTRA (초고성능 심층 추론 · Self-Correction) - [PRO 모델과 한도 공유: 10만 자]";
         }
       } else {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 5만 자]";
-        } if (selected === "pro" {
-          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 2.5만 자]";
+        } else if (selected === "pro") {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [FREE 등급: 일일 한도 2.5만 자]";
         } else {
-          modelDescription.textContent = "HLS ULTRA (최고 능력 추론 및 사고) - [PRO 모델과 한도 공유]";
+          modelDescription.textContent = "HLS PRO-ULTRA (초고성능 심층 추론 · Self-Correction) - [PRO 모델과 한도 공유: 2.5만 자]";
         }
       }
     }
@@ -733,7 +733,7 @@
       content += `대화방: ${titleEl ? titleEl.textContent : '알 수 없음'}\n`;
       content += `내보낸 시각: ${new Date().toLocaleString('ko-KR')}\n`;
       content += `계정 등급: ${userTier}\n`;
-      content += `모델: ${modelSelector.value === 'pro' ? 'HLS PRO' : 'Light HLS'}\n`;
+      content += `모델: ${modelSelector.value === 'ultra' ? 'HLS PRO-ULTRA' : modelSelector.value === 'pro' ? 'HLS PRO' : 'Light HLS'}\n`;
       content += `총 메시지 수: ${chatHistory.length}개\n`;
       content += `========================================\n\n`;
 
@@ -1105,8 +1105,14 @@
       const socket = new WebSocket(socketUrl);
 
       socket.onopen = () => {
+        const selectedModel = modelSelector.value; // 'light' | 'pro' | 'ultra'
+        const isUltraMode = selectedModel === 'ultra';
+        // 백엔드는 modelType을 'light' | 'pro'만 인식하므로 ultra는 pro + useUltraMode 플래그로 전달
+        const wsModelType = selectedModel === 'light' ? 'light' : 'pro';
+
         socket.send(JSON.stringify({ 
-          modelType: modelSelector.value,
+          modelType: wsModelType,
+          useUltraMode: isUltraMode,
           messages: historyPayload 
         }));
       };
