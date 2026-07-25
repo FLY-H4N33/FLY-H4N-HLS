@@ -406,6 +406,7 @@
           <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer w-full sm:w-auto">
             <option value="light">Light HLS</option>
             <option value="pro" selected>HLS PRO</option>
+            <option value="ultra">HLS PRO-ULTRA</option>
           </select>
           <span id="model-description" class="text-[11px] md:text-xs text-gray-400 italic transition-all block truncate">
             불러오는 중...
@@ -519,20 +520,26 @@
       if (userTier === "ELITE") {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [ELITE 등급: 일일 사용량 무제한]";
-        } else {
+        } if (selected === "pro") {
           modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
+        } else{
+          modelDescription.textContent = "HLS PRO - ULTRA (최고 능력 추론 및 사고) - [ELITE 등급: 일일 사용량 무제한]";
         }
       } else if (userTier === "PRO") {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [PRO 등급: 일일 한도 30만 자]";
-        } else {
-          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [PRO 등급: 일일 한도 1만 자]";
+        } if (selected === "pro") {
+          modelDescription.textContent = "HLS PRO (고성능 추론 및 사고) - [PRO 등급: 일일 한도 10만 자]";
+        } else{
+          modelDescription.textContent = "HLS ULTRA (최고 능력 추론 및 사고) - [PRO 모델과 한도 공유]";
         }
       } else {
         if (selected === "light") {
           modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 5만 자]";
+        } if (selected === "pro" {
+          modelDescription.textContent = "Light HLS (가볍고 빠른 속도) - [FREE 등급: 일일 한도 2.5만 자]";
         } else {
-          modelDescription.textContent = "⚠️ FREE 등급은 HLS PRO 모델을 이용할 수 없습니다. (전송 시 차단)";
+          modelDescription.textContent = "HLS ULTRA (최고 능력 추론 및 사고) - [PRO 모델과 한도 공유]";
         }
       }
     }
