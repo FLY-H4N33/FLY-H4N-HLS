@@ -403,6 +403,28 @@
       background: transparent !important;
       padding: 0 !important;
     }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: #8f94ff;
+      box-shadow: 0 0 0 0 rgba(143, 148, 255, .45);
+      animation: status-pulse 1.8s ease-out infinite;
+    }
+    @keyframes status-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(143, 148, 255, .42); opacity: .72; }
+      60% { box-shadow: 0 0 0 6px rgba(143, 148, 255, 0); opacity: 1; }
+      100% { box-shadow: 0 0 0 0 rgba(143, 148, 255, 0); opacity: .72; }
+    }
+    .response-preparing {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 3px 18px;
+      color: #8f9099;
+      font-size: 12px;
+    }
 
     .prose {
       color: #dedee3 !important;
@@ -502,6 +524,18 @@
       font-weight: 700;
     }
     #send-btn:hover { background: #fff !important; transform: translateY(-1px); }
+    #send-btn.generating {
+      color: #f4f4f6 !important;
+      background: #343438 !important;
+    }
+    #send-btn.generating::before {
+      content: '';
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+    #send-btn.generating:hover { background: #414146 !important; }
 
     @media (max-width: 767px) {
       #sidebar { width: min(86vw, 300px); }
@@ -751,7 +785,7 @@
             class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
           <div class="composer-actions flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
             <span id="char-counter" class="text-xs text-gray-500">0 / -</span>
-            <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+            <button type="submit" id="send-btn" aria-label="메시지 전송" title="메시지 전송" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
               전송
             </button>
           </div>
@@ -778,6 +812,9 @@
     let currentInterruptedAssistantText = "";
     let currentInterruptedThoughtText = "";
     let lastActiveBubbleElements = null;
+    let activeSocket = null;
+    let isGenerating = false;
+    let userStoppedCurrentResponse = false;
 
     const userInput = document.getElementById('user-input');
     const charCounter = document.getElementById('char-counter');
@@ -790,6 +827,32 @@
     const roomListContainer = document.getElementById('room-list');
     const currentRoomTitle = document.getElementById('current-room-title');
     const continueBanner = document.getElementById('continue-banner');
+    const sendBtn = document.getElementById('send-btn');
+
+    function setGenerationState(generating) {
+      isGenerating = generating;
+      sendBtn.classList.toggle('generating', generating);
+      sendBtn.setAttribute('aria-label', generating ? '답변 생성 중지' : '메시지 전송');
+      sendBtn.title = generating ? '답변 생성 중지' : '메시지 전송';
+      userInput.disabled = generating;
+      modelSelector.disabled = generating;
+    }
+
+    function stopGeneration() {
+      if (!isGenerating || !activeSocket) return;
+      userStoppedCurrentResponse = true;
+      lastStreamWasClean = true;
+      removeLoading();
+      if (activeSocket.readyState === WebSocket.OPEN || activeSocket.readyState === WebSocket.CONNECTING) {
+        activeSocket.close(1000, 'user_stop');
+      }
+    }
+
+    sendBtn.addEventListener('click', (event) => {
+      if (!isGenerating) return;
+      event.preventDefault();
+      stopGeneration();
+    });
 
     function toggleSidebar(open) {
       const sidebar = document.getElementById('sidebar');
@@ -828,9 +891,9 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       // localhost에서만 사용할 수 있는 안전한 UI 미리보기 모드:
-      // ?preview=main 또는 ?preview=answer (실서비스 인증에는 영향 없음)
+      // ?preview=main, ?preview=answer, ?preview=loading (실서비스 인증에는 영향 없음)
       const previewMode = new URLSearchParams(location.search).get('preview');
-      const isLocalPreview = ['localhost', '127.0.0.1'].includes(location.hostname) && ['main', 'answer'].includes(previewMode);
+      const isLocalPreview = ['localhost', '127.0.0.1'].includes(location.hostname) && ['main', 'answer', 'loading'].includes(previewMode);
       if (isLocalPreview) {
         document.getElementById('auth-overlay').classList.add('hidden');
         applyUserTierConfig('PRO', 100000);
@@ -841,6 +904,20 @@
           const previewBubble = createAssistantBubble();
           previewBubble.indicator.remove();
           previewBubble.contentArea.innerHTML = marked.parse(`오늘 주목할 만한 AI 소식을 간단히 정리했습니다.\n\n## 주요 소식\n\n1. **국내 AI 인프라 투자 확대**\n   기업과 공공 부문의 생성형 AI 도입 및 컴퓨팅 인프라 투자가 이어지고 있습니다.\n\n2. **온디바이스 AI 경쟁 가속**\n   스마트폰과 PC에서 직접 실행되는 경량 AI 모델이 새로운 제품 경쟁력으로 부상했습니다.\n\n3. **AI 안전성과 저작권 논의**\n   모델 학습 데이터, 콘텐츠 표시, 책임 범위를 둘러싼 제도 논의가 구체화되고 있습니다.\n\n> 실제 답변에서는 각 항목에 확인 가능한 출처 링크가 함께 표시됩니다.`);
+        } else if (previewMode === 'loading') {
+          currentRoomTitle.textContent = '응답 생성 미리보기';
+          appendUserMessage('긴 답변을 작성해줘');
+          showLoading();
+          setGenerationState(true);
+          activeSocket = {
+            readyState: WebSocket.OPEN,
+            close() {
+              activeSocket = null;
+              removeLoading();
+              setGenerationState(false);
+              userInput.focus();
+            }
+          };
         }
         return;
       }
@@ -1283,8 +1360,8 @@
           <div class="flex justify-between items-center mb-2">
             <div class="assistant-label text-xs font-semibold uppercase tracking-wider text-gray-400">HLS</div>
             <div class="streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md">
-              <div class="spinner"></div>
-              <span class="animate-pulse">답변 생성 중</span>
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>작성 중</span>
             </div>
           </div>
           
@@ -1357,16 +1434,14 @@
     }
 
     function showLoading() {
+      removeLoading();
       const loader = document.createElement('div');
       loader.id = 'loading-bubble';
-      loader.className = 'flex w-full justify-start';
+      loader.className = 'message-row flex w-full justify-start';
       loader.innerHTML = `
-        <div class="bg-gray-950 text-gray-400 border border-gray-800 rounded-2xl rounded-bl-none p-4 shadow-md w-24">
-          <div class="flex items-center space-x-2 justify-center">
-            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
-            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
-            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
-          </div>
+        <div class="response-preparing" role="status" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>응답을 준비하고 있어요</span>
         </div>
       `;
       chatContainer.appendChild(loader);
@@ -1403,7 +1478,7 @@
         const headerDiv = bubbleElements.wrapper.querySelector('.flex.justify-between');
         const ind = document.createElement('div');
         ind.className = "streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md";
-        ind.innerHTML = `<div class="spinner"></div><span class="animate-pulse">이어서 작성 중</span>`;
+        ind.innerHTML = `<span class="status-dot" aria-hidden="true"></span><span>이어서 작성 중</span>`;
         headerDiv.appendChild(ind);
         bubbleElements.indicator = ind;
       }
@@ -1416,11 +1491,16 @@
       });
 
       lastStreamWasClean = false;
+      setGenerationState(true);
       executeWebSocketStream(temporaryHistory, bubbleElements);
     }
 
     async function handleSubmit(event) {
       event.preventDefault();
+      if (isGenerating) {
+        stopGeneration();
+        return;
+      }
       const text = userInput.value.trim();
       if (!text) return;
 
@@ -1443,6 +1523,7 @@
       currentInterruptedAssistantText = "";
       currentInterruptedThoughtText = "";
 
+      setGenerationState(true);
       executeWebSocketStream(chatHistory, null);
     }
 
@@ -1454,6 +1535,8 @@
 
       const socketUrl = `${WORKER_WS_URL}?key=${encodeURIComponent(userAccessKey)}&roomId=${encodeURIComponent(currentRoomId)}`;
       const socket = new WebSocket(socketUrl);
+      activeSocket = socket;
+      userStoppedCurrentResponse = false;
 
       socket.onopen = () => {
         const selectedModel = modelSelector.value; // 'light' | 'pro' | 'ultra'
@@ -1553,6 +1636,11 @@
       socket.onclose = (closeEvent) => {
         removeLoading();
         if (renderTimeout) clearTimeout(renderTimeout);
+        if (activeSocket === socket) {
+          activeSocket = null;
+          setGenerationState(false);
+          userInput.focus();
+        }
         
         if (bubbleElements && bubbleElements.indicator) {
           bubbleElements.indicator.remove();
@@ -1563,6 +1651,7 @@
         }
 
         if (bubbleElements && assistantText) {
+          bubbleElements.contentArea.innerHTML = marked.parse(assistantText);
           if (typeof Prism !== 'undefined' && Prism.highlightAll) {
             Prism.highlightAll();
           }
@@ -1580,13 +1669,17 @@
           saveCurrentChatToKV(); 
         }
         
-        if (!closeEvent.wasClean && assistantText === "") {
+        if (!userStoppedCurrentResponse && !closeEvent.wasClean && assistantText === "") {
           showError("서버와의 웹소켓 연결이 예기치 않게 종료되었습니다.");
         }
       };
 
       socket.onerror = (error) => {
         removeLoading();
+        if (activeSocket === socket) {
+          activeSocket = null;
+          setGenerationState(false);
+        }
         if (renderTimeout) clearTimeout(renderTimeout);
         if (bubbleElements && bubbleElements.indicator) {
           bubbleElements.indicator.remove();
