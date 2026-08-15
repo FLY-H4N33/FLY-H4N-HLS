@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>HLS Service</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
   <style>
     body { background-color: #0b0c10; }
     .bg-dark-card { background-color: #1f2833; }
@@ -183,6 +183,343 @@
     .terms-scroll::-webkit-scrollbar { width: 5px; }
     .terms-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     .terms-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* ===== HLS Modern Chat UI (인증 화면은 기존 디자인 유지) ===== */
+    :root {
+      color-scheme: dark;
+      --hls-bg: #0d0d0f;
+      --hls-panel: #141416;
+      --hls-panel-soft: #19191c;
+      --hls-hover: #202024;
+      --hls-line: rgba(255, 255, 255, 0.08);
+      --hls-line-strong: rgba(255, 255, 255, 0.14);
+      --hls-text: #f3f4f6;
+      --hls-muted: #9ca3af;
+      --hls-accent: #7c82ff;
+      --hls-accent-strong: #686ef1;
+    }
+
+    body {
+      background: var(--hls-bg);
+      color: var(--hls-text);
+      font-family: Inter, Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    #sidebar {
+      width: 272px;
+      background: #121214 !important;
+      border-color: var(--hls-line) !important;
+      box-shadow: 1px 0 0 rgba(0, 0, 0, 0.18);
+    }
+
+    #sidebar > div:first-child {
+      padding: 18px 14px 12px;
+      border-color: transparent !important;
+      gap: 12px;
+    }
+
+    .hls-brand-row {
+      min-height: 36px;
+      padding: 0 8px !important;
+    }
+
+    .hls-brand {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 9px;
+      letter-spacing: -0.03em;
+    }
+
+    .hls-brand-name {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 760;
+    }
+
+    .user-tier-badge {
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: #aeb2ff !important;
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      letter-spacing: .11em !important;
+      box-shadow: none !important;
+    }
+
+    .new-chat-button {
+      justify-content: flex-start !important;
+      background: transparent !important;
+      border: 1px solid var(--hls-line) !important;
+      border-radius: 12px !important;
+      padding: 10px 12px !important;
+      box-shadow: none !important;
+    }
+
+    .new-chat-button:hover { background: var(--hls-hover) !important; }
+
+    .export-row { padding: 0 14px !important; }
+    .export-row button {
+      background: transparent !important;
+      border-color: transparent !important;
+      justify-content: flex-start !important;
+      padding: 9px 10px !important;
+      border-radius: 10px !important;
+    }
+    .export-row button:hover { background: var(--hls-hover) !important; }
+
+    #room-list { padding: 4px 10px 14px; }
+    #room-list button {
+      padding: 9px 10px !important;
+      border: 0 !important;
+      border-radius: 10px !important;
+      color: #b2b2b8 !important;
+      font-size: 13px !important;
+    }
+    #room-list button:hover,
+    #room-list button.bg-gray-900 {
+      background: var(--hls-hover) !important;
+      color: #fff !important;
+    }
+
+    .app-shell { background: var(--hls-bg); }
+    .app-header {
+      min-height: 58px;
+      padding: 10px 22px !important;
+      background: rgba(13, 13, 15, .86) !important;
+      border-color: transparent !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    #current-room-title { color: #d7d7dc !important; font-weight: 560 !important; }
+    .service-label {
+      color: #7f8089 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      font-size: 11px !important;
+      letter-spacing: .05em !important;
+    }
+
+    #chat-container {
+      width: min(100%, 900px) !important;
+      max-width: 900px !important;
+      padding: 24px 28px 48px !important;
+      scroll-behavior: smooth;
+    }
+
+    #welcome-message {
+      min-height: calc(100% - 20px);
+      display: grid;
+      place-content: center;
+      gap: 14px !important;
+      padding: 56px 0 24px !important;
+    }
+    #welcome-message .logo-style {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      border: 1px solid var(--hls-line-strong);
+      box-shadow: 0 18px 55px rgba(101, 108, 255, .20);
+    }
+    #welcome-message h1 {
+      margin-top: 4px;
+      color: #f5f5f7;
+      font-size: clamp(27px, 3vw, 38px) !important;
+      font-weight: 540 !important;
+      letter-spacing: -.045em;
+    }
+    #welcome-message p { color: #85858d !important; line-height: 1.65; }
+    #welcome-message p:last-child {
+      font-size: 10px !important;
+      opacity: .72;
+    }
+
+    .message-row { animation: message-in .22s ease-out both; }
+    @keyframes message-in {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .assistant-card {
+      width: 100%;
+      max-width: 100% !important;
+      padding: 4px 2px 20px !important;
+      color: #e7e7eb !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .assistant-label {
+      color: #b9bbc5 !important;
+      font-size: 11px !important;
+      font-weight: 750 !important;
+      letter-spacing: .12em !important;
+    }
+    .assistant-label::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--hls-accent);
+      box-shadow: 0 0 14px rgba(124, 130, 255, .8);
+    }
+    .user-card {
+      max-width: min(78%, 680px) !important;
+      padding: 11px 16px !important;
+      color: #f2f2f4 !important;
+      background: #202023 !important;
+      border: 1px solid rgba(255,255,255,.055) !important;
+      border-radius: 20px !important;
+      box-shadow: none !important;
+    }
+    .user-label { display: none; }
+    .user-card .prose { line-height: 1.62 !important; }
+
+    .thought-toggle {
+      margin: 4px 0 12px !important;
+      padding: 7px 10px !important;
+      color: #a7a7af !important;
+      background: #18181b !important;
+      border: 1px solid var(--hls-line) !important;
+      border-radius: 9px !important;
+    }
+    .thought-area {
+      margin-bottom: 16px !important;
+      padding: 12px 14px !important;
+      color: #999aa3 !important;
+      background: #151518 !important;
+      border: 1px solid var(--hls-line) !important;
+      border-left: 2px solid #555a9b !important;
+      border-radius: 8px !important;
+      line-height: 1.65;
+    }
+    .streaming-indicator {
+      color: #aeb2ff !important;
+      background: transparent !important;
+      padding: 0 !important;
+    }
+
+    .prose {
+      color: #dedee3 !important;
+      font-size: 15px !important;
+      line-height: 1.82 !important;
+    }
+    .prose h1, .prose h2, .prose h3, .prose h4 {
+      color: #f4f4f6 !important;
+      letter-spacing: -.025em;
+      border-color: var(--hls-line) !important;
+    }
+    .prose a { color: #aeb2ff !important; text-decoration-color: rgba(174,178,255,.45); }
+    .prose pre {
+      background: #121215 !important;
+      border-color: var(--hls-line) !important;
+      box-shadow: none !important;
+    }
+    .prose :not(pre) > code {
+      color: #c7c9ff !important;
+      background: rgba(124,130,255,.10) !important;
+      border-color: rgba(124,130,255,.18) !important;
+    }
+
+    .chat-footer {
+      padding: 8px 24px max(18px, env(safe-area-inset-bottom)) !important;
+      background: linear-gradient(to top, var(--hls-bg) 74%, rgba(13,13,15,0)) !important;
+      border: 0 !important;
+    }
+    .composer-wrap { max-width: 900px !important; }
+    .model-bar {
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 0 7px 10px;
+      padding: 0 !important;
+      gap: 7px !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+    .model-bar label { display: none; }
+    .model-bar select {
+      width: auto !important;
+      padding: 5px 28px 5px 9px !important;
+      color: #c6c6cc !important;
+      background: #18181b !important;
+      border: 1px solid var(--hls-line) !important;
+      border-radius: 8px !important;
+      font-weight: 600;
+    }
+    #model-description {
+      max-width: min(58vw, 520px);
+      color: #707078 !important;
+      font-style: normal !important;
+      font-size: 10px !important;
+    }
+    #chat-form {
+      padding: 10px 10px 8px !important;
+      background: #1b1b1e !important;
+      border: 1px solid var(--hls-line-strong) !important;
+      border-radius: 22px !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    #chat-form:focus-within {
+      border-color: rgba(124,130,255,.48) !important;
+      box-shadow: 0 12px 44px rgba(0,0,0,.3), 0 0 0 3px rgba(124,130,255,.08);
+    }
+    #user-input {
+      min-height: 56px;
+      max-height: 180px;
+      padding: 8px 10px !important;
+      color: #f5f5f6 !important;
+      font-size: 15px !important;
+      line-height: 1.55;
+    }
+    #user-input::placeholder { color: #73737b !important; }
+    .composer-actions {
+      margin-top: 2px !important;
+      padding: 4px 4px 0 !important;
+      border: 0 !important;
+    }
+    #char-counter { color: #66666e !important; font-size: 10px !important; }
+    #send-btn {
+      width: 36px;
+      height: 36px;
+      padding: 0 !important;
+      display: inline-grid;
+      place-items: center;
+      color: #101014 !important;
+      background: #f0f0f2 !important;
+      border-radius: 50% !important;
+      font-size: 0 !important;
+      box-shadow: none !important;
+    }
+    #send-btn::before {
+      content: '↑';
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 700;
+    }
+    #send-btn:hover { background: #fff !important; transform: translateY(-1px); }
+
+    @media (max-width: 767px) {
+      #sidebar { width: min(86vw, 300px); }
+      .app-header { min-height: 54px; padding: 8px 14px !important; }
+      #chat-container { padding: 18px 16px 34px !important; }
+      #welcome-message { padding-top: 28px !important; }
+      #welcome-message h1 { font-size: 28px !important; }
+      .chat-footer { padding: 6px 10px max(10px, env(safe-area-inset-bottom)) !important; }
+      .model-bar { margin-left: 6px; }
+      #model-description { display: none; }
+      .user-card { max-width: 88% !important; }
+      .prose { font-size: 14px !important; }
+      .service-label { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body class="text-gray-200 h-[100dvh] flex flex-col md:flex-row font-sans overflow-hidden">
@@ -328,8 +665,8 @@
   <!-- 사이드바 -->
   <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-950 border-r border-gray-900 flex flex-col shrink-0 h-full z-30 transform -translate-x-full transition-transform duration-300 md:relative md:transform-none">
     <div class="p-4 border-b border-gray-900 flex flex-col gap-2">
-      <div class="font-extrabold text-xl tracking-wider text-white px-2 py-1 flex items-center justify-between">
-        <span>H4N <span class="text-[#5865F2] text-sm font-normal">AI Chat</span></span>
+      <div class="hls-brand-row font-extrabold text-xl tracking-wider text-white px-2 py-1 flex items-center justify-between">
+        <span class="hls-brand"><span class="hls-brand-name">HLS</span><span id="user-tier-badge-pc" class="user-tier-badge">확인 중</span></span>
         <button onclick="toggleSidebar(false)" class="md:hidden text-gray-400 hover:text-white focus:outline-none">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -337,16 +674,12 @@
       
       <!-- [신규] 내보내기 버튼 -->
 
-      <div class="hidden md:flex px-2 pb-1 items-center space-x-2">
-        <span class="text-xs text-gray-500 font-medium">계정 등급:</span>
-        <span id="user-tier-badge-pc" class="user-tier-badge text-[11px] font-bold px-2 py-0.5 rounded bg-gray-800 text-gray-400 uppercase tracking-wide">확인 중</span>
-      </div>
-      <button onclick="startNewChat(); toggleSidebar(false);" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-lg text-sm font-medium p-2.5 transition flex items-center justify-center gap-2 mt-1 shadow-md">
+      <button onclick="startNewChat(); toggleSidebar(false);" class="new-chat-button w-full bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-lg text-sm font-medium p-2.5 transition flex items-center justify-center gap-2 mt-1 shadow-md">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         새 채팅 시작하기
       </button>
     </div>
-      <div class="flex items-center space-x-2 px-2">
+      <div class="export-row flex items-center space-x-2 px-2">
         <button onclick="exportChatAsText()" 
                 class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1.5 border border-gray-700"
                 title="현재 대화 내용을 텍스트 파일(.txt)로 저장합니다">
@@ -362,8 +695,8 @@
   </aside>
 
   <!-- 메인 영역 -->
-  <div class="flex-1 flex flex-col min-w-0 h-full justify-between overflow-hidden">
-    <header class="border-b border-gray-900 bg-[#0b0c10] px-4 md:px-6 py-3.5 flex justify-between items-center shrink-0">
+  <div class="app-shell flex-1 flex flex-col min-w-0 h-full justify-between overflow-hidden">
+    <header class="app-header border-b border-gray-900 bg-[#0b0c10] px-4 md:px-6 py-3.5 flex justify-between items-center shrink-0">
       <div class="flex items-center space-x-3 min-w-0">
         <button onclick="toggleSidebar(true)" class="md:hidden text-gray-400 hover:text-white p-1 focus:outline-none shrink-0">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -373,7 +706,7 @@
         </div>
         <span id="current-room-title" class="font-bold text-sm text-gray-400 truncate">새로운 대화 세션</span>
       </div>
-      <div class="text-xs md:text-sm font-bold tracking-wide text-white bg-gray-900 border border-gray-800 px-2.5 py-1 rounded-lg shadow-sm shrink-0">
+      <div class="service-label text-xs md:text-sm font-bold tracking-wide text-white bg-gray-900 border border-gray-800 px-2.5 py-1 rounded-lg shadow-sm shrink-0">
         HLS Service
       </div>
     </header>
@@ -389,8 +722,8 @@
       </div>
     </main>
 
-    <footer class="p-4 pb-6 md:p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
-      <div class="max-w-4xl w-full mx-auto relative space-y-3">
+    <footer class="chat-footer p-4 pb-6 md:p-4 bg-[#0b0c10] shrink-0 border-t border-gray-900">
+      <div class="composer-wrap max-w-4xl w-full mx-auto relative space-y-3">
         
         <div id="continue-banner" class="hidden flex items-center justify-between bg-yellow-950 bg-opacity-60 border border-yellow-800 rounded-xl p-3 text-xs text-yellow-200 shadow-sm animate-fade-in">
           <div class="flex items-center space-x-2">
@@ -401,7 +734,7 @@
           </button>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
+        <div class="model-bar flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
           <label for="model-selector" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">MODEL SELECT:</label>
           <select id="model-selector" onchange="updateModelDescription()" class="bg-gray-900 border border-gray-700 rounded-lg text-white text-xs p-1.5 focus:outline-none focus:border-[#5865F2] cursor-pointer w-full sm:w-auto">
             <option value="light">Light HLS</option>
@@ -416,7 +749,7 @@
         <form id="chat-form" onsubmit="handleSubmit(event)" class="relative bg-gray-900 border border-gray-800 rounded-xl focus-within:border-[#5865F2] transition p-2 flex flex-col">
           <textarea id="user-input" rows="3" placeholder="메시지를 입력하세요..." required
             class="w-full bg-transparent resize-none focus:outline-none p-2 text-white placeholder-gray-500 text-sm"></textarea>
-          <div class="flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
+          <div class="composer-actions flex justify-between items-center pt-2 px-2 border-t border-gray-800 mt-2">
             <span id="char-counter" class="text-xs text-gray-500">0 / -</span>
             <button type="submit" id="send-btn" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
               전송
@@ -494,6 +827,24 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
+      // localhost에서만 사용할 수 있는 안전한 UI 미리보기 모드:
+      // ?preview=main 또는 ?preview=answer (실서비스 인증에는 영향 없음)
+      const previewMode = new URLSearchParams(location.search).get('preview');
+      const isLocalPreview = ['localhost', '127.0.0.1'].includes(location.hostname) && ['main', 'answer'].includes(previewMode);
+      if (isLocalPreview) {
+        document.getElementById('auth-overlay').classList.add('hidden');
+        applyUserTierConfig('PRO', 100000);
+        startNewChat();
+        if (previewMode === 'answer') {
+          currentRoomTitle.textContent = 'AI 뉴스 요약';
+          appendUserMessage('오늘 한국 기준 AI 관련 주요 뉴스 3개를 출처 링크와 함께 알려줘');
+          const previewBubble = createAssistantBubble();
+          previewBubble.indicator.remove();
+          previewBubble.contentArea.innerHTML = marked.parse(`오늘 주목할 만한 AI 소식을 간단히 정리했습니다.\n\n## 주요 소식\n\n1. **국내 AI 인프라 투자 확대**\n   기업과 공공 부문의 생성형 AI 도입 및 컴퓨팅 인프라 투자가 이어지고 있습니다.\n\n2. **온디바이스 AI 경쟁 가속**\n   스마트폰과 PC에서 직접 실행되는 경량 AI 모델이 새로운 제품 경쟁력으로 부상했습니다.\n\n3. **AI 안전성과 저작권 논의**\n   모델 학습 데이터, 콘텐츠 표시, 책임 범위를 둘러싼 제도 논의가 구체화되고 있습니다.\n\n> 실제 답변에서는 각 항목에 확인 가능한 출처 링크가 함께 표시됩니다.`);
+        }
+        return;
+      }
+
       if (userAccessKey) {
         document.getElementById('accessKeyInput').value = userAccessKey;
         await validateKeyOnServer(userAccessKey);
@@ -627,19 +978,19 @@
             appendUserMessage(msg.content, false);
           } else if (msg.role === 'assistant') {
             const wrapper = document.createElement('div');
-            wrapper.className = 'flex w-full justify-start';
+            wrapper.className = 'message-row message-row-assistant flex w-full justify-start';
             
             const hasReasoning = !!msg.reasoning;
             wrapper.innerHTML = `
-              <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
+              <div class="assistant-card max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
                 <div class="flex justify-between items-center mb-2">
-                  <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">H4N EXPERT</div>
+                  <div class="assistant-label text-xs font-semibold uppercase tracking-wider text-gray-400">HLS</div>
                 </div>
                 ${hasReasoning ? `
-                <button onclick="toggleThought(this)" class="text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+                <button onclick="toggleThought(this)" class="thought-toggle text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
                   <span>▶ 추론 과정 보기</span>
                 </button>
-                <div class="thought-area border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n${msg.reasoning}</div>
+                <div class="thought-area hidden border-l-2 border-gray-700 pl-3 mb-3 text-xs text-gray-400 italic bg-gray-900 bg-opacity-40 p-2 rounded-r-md">🤔 생각 중:\n${msg.reasoning}</div>
                 ` : ''}
                 <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none chat-content-area">${marked.parse(msg.content)}</div>
               </div>
@@ -738,7 +1089,7 @@
       content += `========================================\n\n`;
 
       chatHistory.forEach((msg, index) => {
-        const role = msg.role === 'user' ? '👤 사용자 (You)' : '🤖 H4N EXPERT (Assistant)';
+        const role = msg.role === 'user' ? '👤 사용자 (You)' : '🤖 HLS (Assistant)';
         // 타임스탬프가 없으면 현재 시간으로 대체 (기존 데이터 호환)
         const time = msg.timestamp ? new Date(msg.timestamp).toLocaleString('ko-KR') : '시간 정보 없음';
         
@@ -925,19 +1276,19 @@
       const welcome = document.getElementById('welcome-message');
       if (welcome) welcome.style.display = 'none';
       const wrapper = document.createElement('div');
-      wrapper.className = 'flex w-full justify-start';
+      wrapper.className = 'message-row message-row-assistant flex w-full justify-start';
       
       wrapper.innerHTML = `
-        <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
+        <div class="assistant-card max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-gray-950 text-gray-100 border border-gray-800 rounded-bl-none shadow-md w-full relative">
           <div class="flex justify-between items-center mb-2">
-            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">H4N EXPERT</div>
+            <div class="assistant-label text-xs font-semibold uppercase tracking-wider text-gray-400">HLS</div>
             <div class="streaming-indicator flex items-center space-x-1.5 text-[11px] text-[#5865F2] font-medium bg-[#5865F2] bg-opacity-10 px-2 py-0.5 rounded-md">
               <div class="spinner"></div>
               <span class="animate-pulse">답변 생성 중</span>
             </div>
           </div>
           
-          <button id="thought-toggle-btn" onclick="toggleThought(this)" class="hidden text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
+          <button id="thought-toggle-btn" onclick="toggleThought(this)" class="thought-toggle hidden text-[11px] text-gray-500 hover:text-gray-300 bg-gray-900 px-2 py-1 rounded-md mb-2 flex items-center gap-1 focus:outline-none">
             <span>▶ 추론 과정 보기</span>
           </button>
           
@@ -992,10 +1343,10 @@
       const welcome = document.getElementById('welcome-message');
       if (welcome) welcome.style.display = 'none';
       const wrapper = document.createElement('div');
-      wrapper.className = 'flex w-full justify-end';
+      wrapper.className = 'message-row message-row-user flex w-full justify-end';
       wrapper.innerHTML = `
-        <div class="max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-[#5865F2] text-white rounded-br-none shadow-md">
-          <div class="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">You</div>
+        <div class="user-card max-w-[95%] sm:max-w-4xl rounded-2xl p-5 bg-[#5865F2] text-white rounded-br-none shadow-md">
+          <div class="user-label text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">You</div>
           <div class="prose prose-invert text-sm break-words leading-relaxed max-w-none">${escapeHtml(text)}</div>
         </div>
       `;
