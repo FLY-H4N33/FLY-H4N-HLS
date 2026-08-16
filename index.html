@@ -1945,6 +1945,25 @@
       executeWebSocketStream(chatHistory, null, attachmentMetadata);
     }
 
+    function isHeartbeatFrame(data) {
+      const lines = String(data)
+        .split("\n")
+        .map(line => line.trim())
+        .filter(Boolean);
+
+      if (lines.length !== 1 || !lines[0].startsWith("data:")) {
+        return false;
+      }
+
+      try {
+        const parsed = JSON.parse(lines[0].replace(/^data:\s*/, ""));
+        const delta = parsed?.choices?.[0]?.delta;
+        return delta && typeof delta === "object" && Object.keys(delta).length === 0;
+      } catch {
+        return false;
+      }
+    }
+
     function executeWebSocketStream(historyPayload, existingBubble = null, requestAttachments = []) {
       let assistantText = currentInterruptedAssistantText || "";
       let thoughtText = currentInterruptedThoughtText || ""; 
@@ -1971,6 +1990,11 @@
       };
 
       socket.onmessage = (msgEvent) => {
+        // Worker의 연결 유지용 빈 delta는 UI와 답변 버퍼에 넣지 않는다.
+        if (isHeartbeatFrame(msgEvent.data)) {
+          return;
+        }
+
         removeLoading();
         
         try {
@@ -2053,6 +2077,11 @@
       };
 
       socket.onclose = (closeEvent) => {
+        console.warn("WebSocket 종료", {
+          code: closeEvent.code,
+          reason: closeEvent.reason,
+          wasClean: closeEvent.wasClean,
+        });
         removeLoading();
         if (requestAttachments.length > 0) refreshUsageFromServer();
         if (renderTimeout) clearTimeout(renderTimeout);
